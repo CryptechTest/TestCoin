@@ -1,3 +1,3 @@
 [submodule "lib/sha"]
 	path = lib/sha
-	url = https://github.com/Egor-Skriptunoff/pure_lua_SHA
+	url = git@github.com:CryptechTest/pure_lua_SHA
