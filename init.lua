@@ -1,10 +1,8 @@
-local S = minetest.get_translator("testcoin")
+local modname = minetest.get_current_modname()
+local modpath = minetest.get_modpath(modname)
+local S = minetest.get_translator(modname)
 
-local sha = dofile(minetest.get_modpath("testcoin") .. "/lib/sha/sha2.lua")
-
--- Make the library module available to your mod
-minetest.log("Hello Hash:" .. sha.sha256("Hello Hash"))
-
+dofile(modpath .. "/chain.lua")
 testcoin = {}
 testcoin.miner_position = {}
 testcoin.chain = {}
