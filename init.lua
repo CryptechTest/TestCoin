@@ -6,16 +6,11 @@ local chain_data = datadir .. "/chain.json"
 local sha = dofile(modpath .. "/lib/sha/sha2.lua")
 
 testcoin = {}
-
 testcoin.miner_position = {}
 testcoin.get_translator = S
 testcoin.wallet_formspec = "size[10.5,11]" ..
     "no_prepend[]" ..
     "label[0.2,0.4;TestCoin Core v0.0.1"
-
-
-
-testcoin.sha256 = sha.sha256
 
 local function to_hex(str)
     local hex = ""
@@ -86,6 +81,42 @@ local function get_staker()
 end
 
 testcoin = {}
+
+
+
+
+-- Load the blockchain data from file when the server starts
+minetest.register_on_mods_loaded(function()
+    minetest.mkdir(datadir)
+    chain = testcoin.load_chain()
+    if #chain == 0 then
+        -- add the genesis block
+        chain[1] = {
+            index = math.floor(1),
+            timestamp = math.floor(os.time()),
+            transactions = {},
+            previousHash = "0000000000000000000000000000000000000000000000000000000000000000",
+            data = to_hex(
+                "Test Coin is the unofficial official fake blockchain and cryptocurrency of Minetest. Unlike real cryptocurrencies, Test Coin has no value in the real world, but in Minetest, it's the hottest thing since lava."),
+            hash = sha.sha256(to_hex(
+                testcoin.serialize_block({
+                    index = math.floor(1),
+                    timestamp = math.floor(os.time()),
+                    transactions = {},
+                    previousHash = "0000000000000000000000000000000000000000000000000000000000000000",
+                    data = to_hex(
+                        "Test Coin is the unofficial official fake blockchain and cryptocurrency of Minetest. Unlike real cryptocurrencies, Test Coin has no value in the real world, but in Minetest, it's the hottest thing since lava.")
+                })
+            ))
+        }
+    end
+end)
+
+-- Save the blockchain data to file when the server stops
+minetest.register_on_shutdown(function()
+    testcoin.save_chain()
+end)
+
 testcoin.get_block = function(index)
     return chain[index] or nil
 end
@@ -189,40 +220,6 @@ testcoin.serialize_transactions = function(transactions)
 end
 
 
-
--- Load the blockchain data from file when the server starts
-minetest.register_on_mods_loaded(function()
-    minetest.mkdir(datadir)
-    chain = testcoin.load_chain()
-    if #chain == 0 then
-        -- add the genesis block
-        chain[1] = {
-            index = math.floor(1),
-            timestamp = math.floor(os.time()),
-            transactions = {},
-            previousHash = "0000000000000000000000000000000000000000000000000000000000000000",
-            data = to_hex(
-                "Test Coin is the unofficial official fake blockchain and cryptocurrency of Minetest. Unlike real cryptocurrencies, Test Coin has no value in the real world, but in Minetest, it's the hottest thing since lava."),
-            hash = testcoin.sha256(to_hex(
-                testcoin.serialize_block({
-                    index = math.floor(1),
-                    timestamp = math.floor(os.time()),
-                    transactions = {},
-                    previousHash = "0000000000000000000000000000000000000000000000000000000000000000",
-                    data = to_hex(
-                        "Test Coin is the unofficial official fake blockchain and cryptocurrency of Minetest. Unlike real cryptocurrencies, Test Coin has no value in the real world, but in Minetest, it's the hottest thing since lava.")
-                })
-            ))
-        }
-    end
-end)
-
--- Save the blockchain data to file when the server stops
-minetest.register_on_shutdown(function()
-    testcoin.save_chain()
-end)
-
-
 -- Load the blockchain data from a file
 testcoin.load_chain = function()
     local file = io.open(chain_data, "r")
@@ -278,7 +275,7 @@ testcoin.mine_block = function(data)
         transactions = {},
         previousHash = chain[height - 1],
         data = data or "",
-        hash = testcoin.sha256(to_hex(
+        hash = sha.sha256(to_hex(
             testcoin.serialize_block({
                 index = math.floor(height),
                 timestamp = timestamp,
