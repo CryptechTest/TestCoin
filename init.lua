@@ -30,7 +30,7 @@ local function from_hex(hex)
 end
 
 local chain = {}
-
+local mempool = {}
 local function get_miner()
     return nil
 end
@@ -261,9 +261,18 @@ testcoin.mine_block = function(data)
         minetest.log("TestCoin: No active miners")
         return
     end
+    mempool[#mempool + 1] = {
+        from = '**coinbase**',
+        to = miner.miner,
+        amount = miner.rate * 1
+    }
     local staker = get_staker()
     if staker ~= nil then
-        -- add staker to the block
+        mempool[#mempool + 1] = {
+            from = '**coinbase**',
+            to = staker.staker,
+            amount = 1
+        }
     else
         minetest.log("TestCoin: No active stakers")
     end
@@ -272,19 +281,18 @@ testcoin.mine_block = function(data)
     chain[height] = {
         index = math.floor(height),
         timestamp = timestamp,
-        transactions = {},
+        transactions = mempool,
         previousHash = chain[height - 1],
         data = data or "",
         hash = sha.sha256(to_hex(
             testcoin.serialize_block({
                 index = math.floor(height),
                 timestamp = timestamp,
-                transactions = {},
+                transactions = mempool,
                 previousHash = chain[height - 1],
                 data = data or ""
             })
         ))
     }
-    -- add transactions to the block
-    -- add block to chain
+    mempool = {}
 end
