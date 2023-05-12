@@ -4,7 +4,7 @@ local S = minetest.get_translator(modname)
 local datadir = minetest.get_worldpath() .. "/testcoin"
 local chain_data = datadir .. "/chain.json"
 local sha = dofile(modpath .. "/lib/sha/sha2.lua")
-
+dofile(modpath .. "/items.lua")
 testcoin = {}
 testcoin.miner_position = {}
 testcoin.get_translator = S
