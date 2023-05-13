@@ -246,8 +246,9 @@ local function register_mining_rig(data)
     local node_name = data.modname .. ":" .. ltier .. "_" .. machine_name
     minetest.register_node(node_name, {
         description = data.machine_desc,
-        tiles = {"default_stone.png", "default_stone.png", "default_stone.png", "default_stone.png",
-                 "default_stone.png", "default_stone.png"},
+        tiles = {ltier .. "_" .. tmachine_name .. "_top.png", ltier .. "_" .. tmachine_name .. "_bottom.png",
+                 ltier .. "_" .. tmachine_name .. "_side.png", ltier .. "_" .. tmachine_name .. "_side.png",
+                 ltier .. "_" .. tmachine_name .. "_back.png", ltier .. "_" .. tmachine_name .. "_front.png"},
         paramtype = "light",
         paramtype2 = "facedir",
         drawtype = "nodebox",
