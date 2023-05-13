@@ -4,11 +4,12 @@ local S = minetest.get_translator(modname)
 local datadir = minetest.get_worldpath() .. "/testcoin"
 local chain_data = datadir .. "/chain.json"
 local sha = dofile(modpath .. "/lib/sha/sha2.lua")
+testcoin = {}
 dofile(modpath .. "/items.lua")
+dofile(modpath .. "/digilines.lua")
 dofile(modpath .. "/nodes.lua")
 dofile(modpath .. "/crafting.lua")
 dofile(modpath .. "/ui.lua")
-testcoin = {}
 testcoin.miner_position = {}
 testcoin.get_translator = S
 testcoin.wallet_formspec = "size[10.5,11]" ..
