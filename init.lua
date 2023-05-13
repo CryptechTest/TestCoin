@@ -5,6 +5,9 @@ local datadir = minetest.get_worldpath() .. "/testcoin"
 local chain_data = datadir .. "/chain.json"
 local sha = dofile(modpath .. "/lib/sha/sha2.lua")
 dofile(modpath .. "/items.lua")
+dofile(modpath .. "/nodes.lua")
+dofile(modpath .. "/crafting.lua")
+dofile(modpath .. "/ui.lua")
 testcoin = {}
 testcoin.miner_position = {}
 testcoin.get_translator = S
@@ -276,7 +279,7 @@ testcoin.mine_block = function(data)
     else
         minetest.log("TestCoin: No active stakers")
     end
-    local height = #chain + 1
+    local height = chain[#chain].index + 1
     local timestamp = math.floor(os.time())
     chain[height] = {
         index = math.floor(height),
