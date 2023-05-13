@@ -41,9 +41,11 @@ local function get_formspec()
         "listring[context;module]" ..
         "listring[current_player;main]" ..
         "label[0.25,0;Miners]" ..
-        "label[4.75,0.75;Hashrate: 0 hps]" ..
-        "label[4.75,1;Modules]" ..
-        "button[4.75,0;3,0.8;;Enable]"
+        "label[3.2,0.2;Hashrate: 0 hps]" ..
+        "label[4.75,1.05;Upgrades]" ..
+        "button[3.25,0.75;1.5,0.8;;On]" ..
+        "button[3.25,1.75;1.5,0.8;;Off]" ..
+        "field[5.05,0.6;3,1;channel;Channel;]"
     --"list[context;main;2.5,0.25;3,2;]" ..
     --"list[current_player;main;0,2.75;8,1;]" ..
     --"list[current_player;main;0,4;8,3;8]" ..
