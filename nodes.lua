@@ -5,11 +5,11 @@ local function get_formspec(pos, data)
 
     return
         "size[8,7]" .. default.gui_bg .. default.gui_bg_img .. default.gui_slots .. "list[context;main;0.25,0.5;3,2]" ..
-            "list[context;module;4.75,1.5;3,1]" .. "list[current_player;main;0,2.75;8,1]" ..
-            "list[current_player;main;0,4;8,3;8]" .. "listring[context;main]" .. "listring[context;module]" ..
-            "listring[current_player;main]" .. "label[0.25,0;Miners]" .. "label[3.2,0.2;" .. hashrate .. " hps]" ..
-            "label[4.75,1.05;Upgrades]" .. "button[3.25,0.75;1.5,0.8;on;On]" .. "button[3.25,1.75;1.5,0.8;off;Off]" ..
-            "field[5.05,0.6;3,1;channel;Channel;" .. def_chan .. "]"
+        "list[context;module;4.75,1.5;3,1]" .. "list[current_player;main;0,2.75;8,1]" ..
+        "list[current_player;main;0,4;8,3;8]" .. "listring[context;main]" .. "listring[context;module]" ..
+        "listring[current_player;main]" .. "label[0.25,0;Miners]" .. "label[3.2,0.2;" .. hashrate .. " hps]" ..
+        "label[4.75,1.05;Upgrades]" .. "button[3.25,0.75;1.5,0.8;on;On]" .. "button[3.25,1.75;1.5,0.8;off;Off]" ..
+        "field[5.05,0.6;3,1;channel;Channel;" .. def_chan .. "]"
 end
 
 local temp_texture
@@ -111,7 +111,7 @@ local function update_shelf(pos)
             local obj_pos = {
                 x = start_pos.x + (item_displacement * offset * obj_dir.x), --- (node_dir.z * overhead * 0.25),
                 y = start_pos.y,
-                z = start_pos.z + (item_displacement * offset * obj_dir.z) --- (node_dir.x * overhead * 0.25)
+                z = start_pos.z + (item_displacement * offset * obj_dir.z)  --- (node_dir.x * overhead * 0.25)
             }
 
             if not list[i]:is_empty() then
@@ -143,7 +143,6 @@ end
 
 -- register_mining_rig
 local function register_mining_rig(data)
-
     local tier = data.tier
     local ltier = string.lower(tier)
     local machine_name = data.machine_name
@@ -246,19 +245,18 @@ local function register_mining_rig(data)
     local node_name = data.modname .. ":" .. ltier .. "_" .. machine_name
     minetest.register_node(node_name, {
         description = data.machine_desc,
-        tiles = {"default_stone.png", "default_stone.png", "default_stone.png", "default_stone.png",
-                 "default_stone.png", "default_stone.png"},
+        tiles = { "default_stone.png", "default_stone.png", "default_stone.png",
+            "default_stone.png", "default_stone.png" },
         paramtype = "light",
         paramtype2 = "facedir",
         drawtype = "nodebox",
         node_box = {
             type = "fixed",
-            fixed = {{-0.5, -0.5, 0.4375, 0.5, 0.5, 0.5}, -- NodeBox1
-            {-0.5, -0.5, -0.5, -0.4375, 0.5, 0.4375}, -- NodeBox2
-            {-0.4375, -0.5, -0.5, 0.4375, -0.4375, 0.4375}, -- NodeBox3
-            {0.4375, -0.5, -0.5, 0.5, 0.5, 0.4375}, -- NodeBox4
-            {-0.4375, 0.4375, -0.5, 0.4375, 0.5, 0.4375}, -- NodeBox5
-            {-0.4375, -0.0625, -0.5, 0.4375, 0.0625, 0.4375} -- NodeBox6
+            fixed = { { -0.5, -0.5, -0.5, -0.4375, 0.5, 0.5 },     -- NodeBox2
+                { -0.4375, -0.5,    -0.5, 0.4375,  -0.4375, 0.5 }, -- NodeBox3
+                { 0.4375,  -0.5,    -0.5, 0.5,     0.5,     0.5 }, -- NodeBox4
+                { -0.4375, 0.4375,  -0.5, 0.4375,  0.5,     0.5 }, -- NodeBox5
+                { -0.4375, -0.0625, -0.5, 0.4375,  0.0625,  0.5 }  -- NodeBox6
             }
         },
         mesh = nil,
@@ -300,7 +298,6 @@ local function register_mining_rig(data)
         on_metadata_inventory_put = update_shelf,
         on_metadata_inventory_take = update_shelf,
         technic_run = run,
-
         after_dig_node = function(pos, oldnode, oldmetadata, digger)
             return technic.machine_after_dig_node
         end,
@@ -351,7 +348,6 @@ local function register_mining_rig(data)
             -- Disable rotation by screwdriver
             return false
         end,
-
         on_receive_fields = function(pos, formname, fields, sender)
             if fields.quit then
                 return
@@ -371,7 +367,6 @@ local function register_mining_rig(data)
             local formspec = get_formspec(pos, data)
             meta:set_string("formspec", formspec)
         end,
-
         digiline = {
             receptor = {
                 action = function()
@@ -384,7 +379,6 @@ local function register_mining_rig(data)
     })
 
     technic.register_machine(tier, node_name, technic.receiver)
-
 end
 
 -------------------------------------------------------
@@ -396,7 +390,7 @@ register_mining_rig({
     modname = "testcoin",
     machine_name = "mining_rig",
     machine_desc = "Mining Rig",
-    demand = {100},
+    demand = { 100 },
     speed = 1
 })
 
@@ -408,7 +402,7 @@ minetest.register_entity("testcoin:item", {
         x = 0.3,
         y = 0.3
     },
-    collisionbox = {0, 0, 0, 0, 0, 0},
+    collisionbox = { 0, 0, 0, 0, 0, 0 },
     physical = false,
     on_activate = function(self, staticdata)
         -- Staticdata
