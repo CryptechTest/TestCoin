@@ -1,33 +1,3 @@
---[[
-itemshelf.register_shelf("testcoin:mining_rig", {
-    description = "Mining Rig",
-    textures = {
-        "default_stone.png",
-        "default_stone.png",
-        "default_stone.png",
-        "default_stone.png",
-        "default_stone.png",
-        "default_stone.png",
-    },
-    nodebox = {
-        type = "fixed",
-        fixed = {
-            { -0.5,    -0.5,    0.4375, 0.5,     0.5,     0.5 },    -- NodeBox1
-            { -0.5,    -0.5,    -0.5,   -0.4375, 0.5,     0.4375 }, -- NodeBox2
-            { -0.4375, -0.5,    -0.5,   0.4375,  -0.4375, 0.4375 }, -- NodeBox3
-            { 0.4375,  -0.5,    -0.5,   0.5,     0.5,     0.4375 }, -- NodeBox4
-            { -0.4375, 0.4375,  -0.5,   0.4375,  0.5,     0.4375 }, -- NodeBox5
-            { -0.4375, -0.0625, -0.5,   0.4375,  0.0625,  0.4375 }, -- NodeBox6
-        }
-    },
-    capacity = 6,
-    shown_items = 6,
-})
-]]
---
-
-
-
 local function get_formspec()
     return "size[8,7]" ..
         default.gui_bg ..
@@ -46,11 +16,6 @@ local function get_formspec()
         "button[3.25,0.75;1.5,0.8;;On]" ..
         "button[3.25,1.75;1.5,0.8;;Off]" ..
         "field[5.05,0.6;3,1;channel;Channel;]"
-    --"list[context;main;2.5,0.25;3,2;]" ..
-    --"list[current_player;main;0,2.75;8,1;]" ..
-    --"list[current_player;main;0,4;8,3;8]" ..
-    --"listring[context;main]" ..
-    --"listring[current_player;main]"
 end
 
 local temp_texture
@@ -207,17 +172,6 @@ minetest.register_node("testcoin:mining_rig", {
         inv:set_size("module", 3)
         -- Initialize formspec
         meta:set_string("formspec", get_formspec())
-        -- If given half_depth, initialize the displacement
-        --if def.half_depth == true then
-        --    meta:set_float("itemshelf:depth_displacement", -0.1475)
-        --end
-        -- Initialize custom displacements if defined
-        --if def.vertical_offset then
-        --    meta:set_float("itemshelf:vertical_displacement", def.vertical_offset)
-        --end
-        --if def.depth_offset then
-        --    meta:set_float("itemshelf:depth_displacement", def.depth_offset)
-        --end
     end,
     allow_metadata_inventory_move = function(pos, from_list, from_index,
                                              to_list, to_index, count, player)
