@@ -7,8 +7,8 @@ local function get_formspec(pos, data)
         "size[8,7]" .. default.gui_bg .. default.gui_bg_img .. default.gui_slots .. "list[context;main;0.25,0.5;3,2]" ..
         "list[context;module;4.75,1.5;3,1]" .. "list[current_player;main;0,2.75;8,1]" ..
         "list[current_player;main;0,4;8,3;8]" .. "listring[context;main]" .. "listring[context;module]" ..
-        "listring[current_player;main]" .. "label[0.25,0;Miners]" .. "label[3.2,0.2;" .. hashrate .. " hps]" ..
-        "label[4.75,1.05;Upgrades]" .. "button[3.25,0.75;1.5,0.8;on;On]" .. "button[3.25,1.75;1.5,0.8;off;Off]" ..
+        "listring[current_player;main]" .. "label[0.25,0;Miners]" .. "label[3.2,0.1;" .. hashrate .. " hps]" ..
+        "label[4.75,1.05;Upgrades]" .. "button[3.25,0.65;1.5,0.8;on;On]" .. "button[3.25,1.65;1.5,0.8;off;Off]" ..
         "field[5.05,0.6;3,1;channel;Channel;" .. def_chan .. "]"
 end
 
@@ -245,9 +245,9 @@ local function register_mining_rig(data)
     local node_name = data.modname .. ":" .. ltier .. "_" .. machine_name
     minetest.register_node(node_name, {
         description = data.machine_desc,
-        tiles = {ltier .. "_" .. tmachine_name .. "_top.png", ltier .. "_" .. tmachine_name .. "_bottom.png",
-                 ltier .. "_" .. tmachine_name .. "_side.png", ltier .. "_" .. tmachine_name .. "_side.png",
-                 ltier .. "_" .. tmachine_name .. "_back.png", ltier .. "_" .. tmachine_name .. "_front.png"},
+        tiles = { ltier .. "_" .. tmachine_name .. "_top.png", ltier .. "_" .. tmachine_name .. "_bottom.png",
+            ltier .. "_" .. tmachine_name .. "_side.png", ltier .. "_" .. tmachine_name .. "_side.png",
+            ltier .. "_" .. tmachine_name .. "_back.png", ltier .. "_" .. tmachine_name .. "_front.png" },
         paramtype = "light",
         paramtype2 = "facedir",
         drawtype = "nodebox",
