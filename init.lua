@@ -477,3 +477,12 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
         ui.set_inventory_formspec(player, "testcoin_withdraw")
     end
 end)
+
+local loot = {
+    { name = 'testcoin:coin', chance = 0.1, count = { 1, 4 },  y = { 128, -3333 } },
+    { name = 'testcoin:coin', chance = 0.1, count = { 2, 8 },  y = { -3334, -6666 } },
+    { name = 'testcoin:coin', chance = 0.1, count = { 4, 16 }, y = { -6667, -9999 } },
+    { name = 'testcoin:coin', chance = 0.1, count = { 8, 32 }, y = { -10000, -11000 } },
+}
+
+dungeon_loot.register(loot)
