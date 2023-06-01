@@ -318,8 +318,8 @@ testcoin.create_transaction = function(from, to, amount)
                 table.insert(testcoin.mempool,
                     { from = from:get_player_name(), to = to:get_player_name(), amount = math.floor(amount) })
                 local stack = ItemStack("testcoin:coin", math.floor(amount))
-                local c = finv.remove_item("testcoin", stack)
-                local r = tinv.add_item("testcoin", c)
+                local c = finv:remove_item("testcoin", stack)
+                local r = tinv:add_item("testcoin", c)
                 if r and not r:is_empty() then
                     local pos = to:get_pos()
                     pos.y = pos.y + 0.5
