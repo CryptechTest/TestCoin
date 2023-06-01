@@ -6,6 +6,32 @@ ui.register_button("testcoin_main", {
     tooltip = "TestCoin"
 })
 
+local function left_menu_section(player, perplayer_formspec)
+    return { 
+        perplayer_formspec.standard_inv_bg,
+        "label[", perplayer_formspec.form_header_x, ",",
+        perplayer_formspec.form_header_y, ";", "TestCoin Core v", testcoin.ver, "]",
+        "box[" ..
+        perplayer_formspec.form_header_x + 0.1 .. "," .. perplayer_formspec.form_header_y + 0.2 .. ";4.5,5;#0c0c0c]",
+        "label[" .. perplayer_formspec.form_header_x + 1.85 .. "," ..
+        perplayer_formspec.form_header_y + 0.5 .. ";Balance]",
+        "label[" .. perplayer_formspec.form_header_x + 1.85 ..
+        "," .. perplayer_formspec.form_header_y + 1 .. ";0 TEST]",
+        "button[" ..
+        perplayer_formspec.form_header_x + 0.35 ..
+        "," .. perplayer_formspec.form_header_y + 1.5 .. ";4,0.8;testcoin_transfer;Transfer]",
+        "button[" ..
+        perplayer_formspec.form_header_x + 0.35 ..
+        "," .. perplayer_formspec.form_header_y + 2.4 .. ";4,0.8;testcoin_deposit;Deposit]",
+        "button[" ..
+        perplayer_formspec.form_header_x + 0.35 ..
+        "," .. perplayer_formspec.form_header_y + 3.3 .. ";4,0.8;testcoin_withdraw;Withdraw]",
+        "button[" ..
+        perplayer_formspec.form_header_x + 0.35 ..
+        "," .. perplayer_formspec.form_header_y + 4.2 .. ";4,0.8;testcoin_convert;Convert]",
+    }
+end
+
 ui.register_page("testcoin_main", {
     get_formspec = function(player, perplayer_formspec)
         --local player_name = player:get_player_name()
@@ -21,28 +47,8 @@ ui.register_page("testcoin_main", {
                 end
             end
         end
-        local formspec = {
-            perplayer_formspec.standard_inv_bg,
-            "label[", perplayer_formspec.form_header_x, ",",
-            perplayer_formspec.form_header_y, ";", "TestCoin Core v", testcoin.ver, "]",
-            "box[" ..
-            perplayer_formspec.form_header_x + 0.1 .. "," .. perplayer_formspec.form_header_y + 0.2 .. ";4.5,5;#0c0c0c]",
-            "label[" .. perplayer_formspec.form_header_x + 1.85 .. "," ..
-            perplayer_formspec.form_header_y + 0.5 .. ";Balance]",
-            "label[" .. perplayer_formspec.form_header_x + 1.85 ..
-            "," .. perplayer_formspec.form_header_y + 1 .. ";0 TEST]",
-            "button[" ..
-            perplayer_formspec.form_header_x + 0.35 ..
-            "," .. perplayer_formspec.form_header_y + 1.5 .. ";4,0.8;testcoin_transfer;Transfer]",
-            "button[" ..
-            perplayer_formspec.form_header_x + 0.35 ..
-            "," .. perplayer_formspec.form_header_y + 2.4 .. ";4,0.8;testcoin_deposit;Deposit]",
-            "button[" ..
-            perplayer_formspec.form_header_x + 0.35 ..
-            "," .. perplayer_formspec.form_header_y + 3.3 .. ";4,0.8;testcoin_withdraw;Withdraw]",
-            "button[" ..
-            perplayer_formspec.form_header_x + 0.35 ..
-            "," .. perplayer_formspec.form_header_y + 4.2 .. ";4,0.8;testcoin_convert;Convert]",
+        local formspec_left = left_menu_section(player, perplayer_formspec)
+        local formspec_right = {
             "box[" ..
             perplayer_formspec.form_header_x + 5.05 .. "," .. perplayer_formspec.form_header_y + 0.2 .. ";4.5,5;#0c0c0c]",
             "label[" .. perplayer_formspec.form_header_x + 5.15 .. "," ..
@@ -69,7 +75,7 @@ ui.register_page("testcoin_main", {
 
         }
 
-        return { formspec = table.concat(formspec) }
+        return { formspec = table.concat(formspec_left) .. table.concat(formspec_right) }
     end,
 })
 
@@ -77,15 +83,57 @@ ui.register_page("testcoin_convert", {
     get_formspec = function(player, perplayer_formspec)
         --local player_name = player:get_player_name()
 
-        local formspec = {
-            perplayer_formspec.standard_inv_bg,
-            "label[", perplayer_formspec.form_header_x, ",",
-            perplayer_formspec.form_header_y, ";", "TestCoin Core v", testcoin.ver, "]",
-            "label[", perplayer_formspec.form_header_x, ",",
-            perplayer_formspec.form_header_y + 0.25, ";", "Convert TestCoin]",
+        local formspec_left = left_menu_section(player, perplayer_formspec)
+        local formspec_right = {
+            "box[" ..
+            perplayer_formspec.form_header_x + 5.05 .. "," .. perplayer_formspec.form_header_y + 0.2 .. ";4.5,5;#0c0c0c]",
+            "label[" .. perplayer_formspec.form_header_x + 5.15 .. "," ..
+            perplayer_formspec.form_header_y + 0.5 .. ";Convert TestCoin]",
+            -- first row coins
+            "image_button[" ..
+            perplayer_formspec.form_header_x + 5.4 ..
+            "," .. perplayer_formspec.form_header_y + 0.75 .. ";0.6,0.6;testcoin_scc2.png;coin_scc;]",
+            "image_button[" ..
+            perplayer_formspec.form_header_x + 6.2 ..
+            "," .. perplayer_formspec.form_header_y + 0.75 .. ";0.6,0.6;testcoin_mrx.png;coin_mrx;]",
+            "image_button[" ..
+            perplayer_formspec.form_header_x + 7.0 ..
+            "," .. perplayer_formspec.form_header_y + 0.75 .. ";0.6,0.6;testcoin_btc.png;coin_btc;]",
+            "image_button[" ..
+            perplayer_formspec.form_header_x + 7.8 ..
+            "," .. perplayer_formspec.form_header_y + 0.75 .. ";0.6,0.6;testcoin_eth.png;coin_eth;]",
+            "image_button[" ..
+            perplayer_formspec.form_header_x + 8.6 ..
+            "," .. perplayer_formspec.form_header_y + 0.75 .. ";0.6,0.6;testcoin_send.png;coin_send;]",
+            -- seconds row coins
+            "image_button[" ..
+            perplayer_formspec.form_header_x + 5.4 ..
+            "," .. perplayer_formspec.form_header_y + 1.5 .. ";0.6,0.6;testcoin_coin.png;coin_6;]",
+            "image_button[" ..
+            perplayer_formspec.form_header_x + 6.2 ..
+            "," .. perplayer_formspec.form_header_y + 1.5 .. ";0.6,0.6;testcoin_coin.png;coin_7;]",
+            "image_button[" ..
+            perplayer_formspec.form_header_x + 7.0 ..
+            "," .. perplayer_formspec.form_header_y + 1.5 .. ";0.6,0.6;testcoin_coin.png;coin_8;]",
+            "image_button[" ..
+            perplayer_formspec.form_header_x + 7.8 ..
+            "," .. perplayer_formspec.form_header_y + 1.5 .. ";0.6,0.6;testcoin_coin.png;coin_9;]",
+            "image_button[" ..
+            perplayer_formspec.form_header_x + 8.6 ..
+            "," .. perplayer_formspec.form_header_y + 1.5 .. ";0.6,0.6;testcoin_coin.png;coin_10;]",
+            -- fields
+            "field[" .. perplayer_formspec.form_header_x + 5.15 .. "," ..
+            perplayer_formspec.form_header_y + 2.5 .. ";4.3,0.6;input_amount;Amount:;]",
+            "field[" .. perplayer_formspec.form_header_x + 5.15 .. "," ..
+            perplayer_formspec.form_header_y + 3.5 .. ";4.3,0.6;input_address;Address:;]",
+            -- submit
+            "button[" ..
+            perplayer_formspec.form_header_x + 5.15 ..
+            "," .. perplayer_formspec.form_header_y + 4.2 .. ";4.3,0.8;submit_convert;Submit]",
+
         }
 
-        return { formspec = table.concat(formspec) }
+        return { formspec = table.concat(formspec_left) .. table.concat(formspec_right) }
     end,
 })
 
@@ -93,31 +141,31 @@ ui.register_page("testcoin_deposit", {
     get_formspec = function(player, perplayer_formspec)
         --local player_name = player:get_player_name()
 
-        local formspec = {
-            perplayer_formspec.standard_inv_bg,
-            "label[", perplayer_formspec.form_header_x, ",",
-            perplayer_formspec.form_header_y, ";", "TestCoin Core v", testcoin.ver, "]",
-            "label[", perplayer_formspec.form_header_x, ",",
-            perplayer_formspec.form_header_y + 0.25, ";", "Deposit TestCoin]",
+        local formspec_left = left_menu_section(player, perplayer_formspec)
+        local formspec_right = {
+            "box[" ..
+            perplayer_formspec.form_header_x + 5.05 .. "," .. perplayer_formspec.form_header_y + 0.2 .. ";4.5,5;#0c0c0c]",
+            "label[" .. perplayer_formspec.form_header_x + 5.15 .. "," ..
+            perplayer_formspec.form_header_y + 0.5 .. ";Deposit TestCoin]",
         }
 
-        return { formspec = table.concat(formspec) }
+        return { formspec = table.concat(formspec_left) .. table.concat(formspec_right) }
     end,
 })
 
 ui.register_page("testcoin_transfer", {
     get_formspec = function(player, perplayer_formspec)
-        --local player_name = player:get_player_name()
+        --local player_name = player:get_player_nam
 
-        local formspec = {
-            perplayer_formspec.standard_inv_bg,
-            "label[", perplayer_formspec.form_header_x, ",",
-            perplayer_formspec.form_header_y, ";", "TestCoin Core v", testcoin.ver, "]",
-            "label[", perplayer_formspec.form_header_x, ",",
-            perplayer_formspec.form_header_y + 0.25, ";", "Transfer TestCoin]",
+        local formspec_left = left_menu_section(player, perplayer_formspec)
+        local formspec_right = {
+            "box[" ..
+            perplayer_formspec.form_header_x + 5.05 .. "," .. perplayer_formspec.form_header_y + 0.2 .. ";4.5,5;#0c0c0c]",
+            "label[" .. perplayer_formspec.form_header_x + 5.15 .. "," ..
+            perplayer_formspec.form_header_y + 0.5 .. ";Transfer TestCoin]",
         }
 
-        return { formspec = table.concat(formspec) }
+        return { formspec = table.concat(formspec_left) .. table.concat(formspec_right) }
     end,
 })
 
@@ -125,15 +173,15 @@ ui.register_page("testcoin_withdraw", {
     get_formspec = function(player, perplayer_formspec)
         --local player_name = player:get_player_name()
 
-        local formspec = {
-            perplayer_formspec.standard_inv_bg,
-            "label[", perplayer_formspec.form_header_x, ",",
-            perplayer_formspec.form_header_y, ";", "TestCoin Core v", testcoin.ver, "]",
-            "label[", perplayer_formspec.form_header_x, ",",
-            perplayer_formspec.form_header_y + 0.25, ";", "Withdraw TestCoin]",
+        local formspec_left = left_menu_section(player, perplayer_formspec)
+        local formspec_right = {
+            "box[" ..
+            perplayer_formspec.form_header_x + 5.05 .. "," .. perplayer_formspec.form_header_y + 0.2 .. ";4.5,5;#0c0c0c]",
+            "label[" .. perplayer_formspec.form_header_x + 5.15 .. "," ..
+            perplayer_formspec.form_header_y + 0.5 .. ";Withdraw TestCoin]",
         }
 
-        return { formspec = table.concat(formspec) }
+        return { formspec = table.concat(formspec_left) .. table.concat(formspec_right) }
     end,
 })
 
