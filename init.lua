@@ -315,9 +315,16 @@ testcoin.create_transaction = function(from, to, amount)
                 end
             end
             if balance >= math.floor(amount) then
+                table.insert(testcoin.mempool,
+                    { from = from:get_player_name(), to = to:get_player_name(), amount = math.floor(amount) })
                 local stack = ItemStack("testcoin:coin", math.floor(amount))
                 local c = finv.remove_item("testcoin", stack)
-                tinv.add_item("testcoin", c)
+                local r = tinv.add_item("testcoin", c)
+                if r and not r:is_empty() then
+                    local pos = to:get_pos()
+                    pos.y = pos.y + 0.5
+                    minetest.add_item(pos, r)
+                end
             end
         end
     end
