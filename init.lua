@@ -298,6 +298,31 @@ testcoin.mine_block = function(data)
     testcoin.mempool = {}
 end
 
+testcoin.create_transaction = function(from, to, amount)
+    local finv = from:get_inventory()
+    local tinv = to:get_inventory()
+    if amount <= 0 then
+        return false
+    end
+    if finv and not finv:is_empty("testcoin") and tinv then
+        local balance = 0
+        local coins = finv:get_list("testcoin")
+        if #coins > 0 then
+            for _, coin in ipairs(coins) do
+                if coin ~= nil and not coin:is_empty() then
+                    balance = balance + coin:get_count()
+                end
+            end
+            if balance >= math.floor(amount) then
+                local stack = ItemStack("testcoin:coin", math.floor(amount))
+                local c = finv.remove_item("testcoin", stack)
+                tinv.add_item("testcoin", c)
+            end
+        end
+    end
+    return false
+end
+
 
 minetest.register_on_joinplayer(function(player, last_login)
     local inv = player:get_inventory()
