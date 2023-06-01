@@ -329,21 +329,11 @@ minetest.register_on_joinplayer(function(player, last_login)
     if not inv:set_size("testcoin", 4096) then
         minetest.log("warning", "Failed to set inventory size")
     end
-end)
-
-minetest.register_allow_player_inventory_action(function(player, action, inventory, info)
-    -- From detached inventory -> player inventory: put & take callbacks
-    if action == "put" and info.listname:find("testcoin") then
-        return 0
-    end
-    if action == "take" and info.listname:find("testcoin") then
-        return 0
-    end
-    if action == "move" and (info.from_list:find("testcoin") or info.to_list:find("testcoin")) then
-        return 0
+    local inv = player:get_inventory()
+    if not inv:set_size("testcoin_buffer", 6) then
+        minetest.log("Failed to create buffer inv")
     end
 end)
-
 
 
 local loot = {

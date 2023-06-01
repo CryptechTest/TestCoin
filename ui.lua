@@ -7,6 +7,16 @@ ui.register_button("testcoin_main", {
 })
 
 local function left_menu_section(player, perplayer_formspec)
+    local balance = 0
+    local inv = player:get_inventory()
+    local coins = inv:get_list("testcoin")
+    if #coins > 0 then
+        for _, coin in ipairs(coins) do
+            if coin ~= nil and not coin:is_empty() then
+                balance = balance + coin:get_count()
+            end
+        end
+    end
     return { 
         perplayer_formspec.standard_inv_bg,
         "label[", perplayer_formspec.form_header_x, ",",
@@ -16,7 +26,7 @@ local function left_menu_section(player, perplayer_formspec)
         "label[" .. perplayer_formspec.form_header_x + 1.85 .. "," ..
         perplayer_formspec.form_header_y + 0.5 .. ";Balance]",
         "label[" .. perplayer_formspec.form_header_x + 1.85 ..
-        "," .. perplayer_formspec.form_header_y + 1 .. ";0 TEST]",
+        "," .. perplayer_formspec.form_header_y + 1 .. ";".. balance .." TEST]",
         "button[" ..
         perplayer_formspec.form_header_x + 0.35 ..
         "," .. perplayer_formspec.form_header_y + 1.5 .. ";4,0.8;testcoin_transfer;Transfer]",
@@ -147,6 +157,18 @@ ui.register_page("testcoin_deposit", {
             perplayer_formspec.form_header_x + 5.05 .. "," .. perplayer_formspec.form_header_y + 0.2 .. ";4.5,5;#0c0c0c]",
             "label[" .. perplayer_formspec.form_header_x + 5.15 .. "," ..
             perplayer_formspec.form_header_y + 0.5 .. ";Deposit TestCoin]",
+
+            -- inventory
+            ui.make_inv_img_grid(perplayer_formspec.form_header_x + 5.5, perplayer_formspec.form_header_y + 1, 3, 2),
+            "listring[current_player;main]",
+            "list[current_player;testcoin_buffer;".. perplayer_formspec.form_header_x + 5.6 .. "," .. 
+            perplayer_formspec.form_header_y + 1.1 .. ";3,2;0]",
+            "listring[current_player;testcoin_buffer]",
+
+            -- submit
+            "button[" ..
+            perplayer_formspec.form_header_x + 5.15 ..
+            "," .. perplayer_formspec.form_header_y + 4.2 .. ";4.3,0.8;submit_deposit;Submit]",
         }
 
         return { formspec = table.concat(formspec_left) .. table.concat(formspec_right) }
@@ -163,6 +185,16 @@ ui.register_page("testcoin_transfer", {
             perplayer_formspec.form_header_x + 5.05 .. "," .. perplayer_formspec.form_header_y + 0.2 .. ";4.5,5;#0c0c0c]",
             "label[" .. perplayer_formspec.form_header_x + 5.15 .. "," ..
             perplayer_formspec.form_header_y + 0.5 .. ";Transfer TestCoin]",
+            
+            -- fields
+            "field[" .. perplayer_formspec.form_header_x + 5.15 .. "," ..
+            perplayer_formspec.form_header_y + 2.5 .. ";4.3,0.6;input_amount;Amount:;]",
+            "field[" .. perplayer_formspec.form_header_x + 5.15 .. "," ..
+            perplayer_formspec.form_header_y + 3.5 .. ";4.3,0.6;input_address;Player Name:;]",
+            -- submit
+            "button[" ..
+            perplayer_formspec.form_header_x + 5.15 ..
+            "," .. perplayer_formspec.form_header_y + 4.2 .. ";4.3,0.8;submit_transfer;Submit]",
         }
 
         return { formspec = table.concat(formspec_left) .. table.concat(formspec_right) }
@@ -179,6 +211,14 @@ ui.register_page("testcoin_withdraw", {
             perplayer_formspec.form_header_x + 5.05 .. "," .. perplayer_formspec.form_header_y + 0.2 .. ";4.5,5;#0c0c0c]",
             "label[" .. perplayer_formspec.form_header_x + 5.15 .. "," ..
             perplayer_formspec.form_header_y + 0.5 .. ";Withdraw TestCoin]",
+
+            -- fields
+            "field[" .. perplayer_formspec.form_header_x + 5.15 .. "," ..
+            perplayer_formspec.form_header_y + 1.5 .. ";4.3,0.6;input_amount;Amount:;]",
+            -- submit
+            "button[" ..
+            perplayer_formspec.form_header_x + 5.15 ..
+            "," .. perplayer_formspec.form_header_y + 4.2 .. ";4.3,0.8;submit_withdraw;Submit]",
         }
 
         return { formspec = table.concat(formspec_left) .. table.concat(formspec_right) }
@@ -186,10 +226,57 @@ ui.register_page("testcoin_withdraw", {
 })
 
 
+minetest.register_allow_player_inventory_action(function(player, action, inventory, info)
+    -- From detached inventory -> player inventory: put & take callbacks
+    if action == "put" and info.listname:find("testcoin") then
+        return 0
+    end
+    if action == "take" and info.listname:find("testcoin") then
+        return 0
+    end
+    if action == "move" and (info.from_list:find("main") and info.to_list:find("testcoin_buffer")) then
+	    local stack = inventory:get_stack(info.from_list, info.from_index)
+        if stack ~= nil and stack:get_name() == "testcoin:coin" then
+            return info.count
+        end
+        return 0
+    end    
+    if action == "move" and (info.from_list:find("testcoin") or info.to_list:find("testcoin")) then
+        return 0
+    end
+end)
+
 minetest.register_on_player_receive_fields(function(player, formname, fields)
     if formname ~= "" then
         return
     end
+
+    if fields.submit_deposit then
+        local balance = 0
+        local inv = player:get_inventory()
+        local coins = inv:get_list("testcoin_buffer")
+        if #coins > 0 then
+            for _, coin in ipairs(coins) do
+                if coin ~= nil and not coin:is_empty() then
+                    balance = balance + coin:get_count()
+					inv:add_item("testcoin", coin)
+                end
+            end
+        end
+        minetest.log("Found Balance: " .. balance)
+        inv:set_list("testcoin_buffer", {})
+        ui.set_inventory_formspec(player, "testcoin_deposit")
+        return
+    end
+
+    if fields.submit_transfer then
+        local amount = fields.input_amount
+        local address = fields.input_address
+        minetest.log("Amt: " .. amount .. "  Addr: " .. address)
+    end
+
+    minetest.log("Received!")
+
     if fields["testcoin_convert"] then
         ui.set_inventory_formspec(player, "testcoin_convert")
     elseif fields["testcoin_deposit"] then
@@ -200,3 +287,4 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
         ui.set_inventory_formspec(player, "testcoin_withdraw")
     end
 end)
+
