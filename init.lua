@@ -10,6 +10,7 @@ testcoin.chain = {}
 testcoin.mempool = {}
 testcoin.miner_position = {}
 testcoin.get_translator = S
+dofile(modpath .. "/functions.lua")
 dofile(modpath .. "/items.lua")
 dofile(modpath .. "/digilines.lua")
 dofile(modpath .. "/nodes.lua")

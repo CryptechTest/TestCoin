@@ -1,5 +1,9 @@
 local ui = unified_inventory
 
+local function isInteger(str)
+    return tonumber(str) ~= nil
+end
+
 ui.register_button("testcoin_main", {
     type = "image",
     image = "testcoin_ui_icon.png",
@@ -251,6 +255,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
         return
     end
 
+    -- deposit to local
     if fields.submit_deposit then
         local balance = 0
         local inv = player:get_inventory()
@@ -263,20 +268,43 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
                 end
             end
         end
-        minetest.log("Found Balance: " .. balance)
+        minetest.log("Found Deposit: " .. balance)
         inv:set_list("testcoin_buffer", {})
         ui.set_inventory_formspec(player, "testcoin_deposit")
         return
     end
 
+    -- transfer to player
     if fields.submit_transfer then
         local amount = fields.input_amount
         local address = fields.input_address
         minetest.log("Amt: " .. amount .. "  Addr: " .. address)
+        ui.set_inventory_formspec(player, "testcoin_transfer")
+        return
+    end
+    
+    -- convert to real coin
+    if fields.submit_convert then
+        local amount = fields.input_amount
+        local address = fields.input_address
+        minetest.log("Amt: " .. amount .. "  Addr: " .. address)        
+        ui.set_inventory_formspec(player, "testcoin_convert")
+        return
     end
 
-    minetest.log("Received!")
+    -- withdraw from local
+    if fields.submit_withdraw then
+        local amount = fields.input_amount
+        minetest.log("Amt: " .. amount)
 
+        if isInteger(amount) then
+            testcoin.withdraw(player, tonumber(amount))
+            ui.set_inventory_formspec(player, "testcoin_withdraw")
+            return
+        end
+    end
+
+    -- handle tabs
     if fields["testcoin_convert"] then
         ui.set_inventory_formspec(player, "testcoin_convert")
     elseif fields["testcoin_deposit"] then
