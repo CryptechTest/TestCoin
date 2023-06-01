@@ -39,8 +39,8 @@ function testcoin.withdraw(player, amount)
     minetest.log("stacks: " .. stacks .. "  rem: " .. rem )
 
     local balance = get_balance(player)
-    if amount >= balance then
-       return 0
+    if amount > balance then
+       return false
     end
     
     local total_amt = amount
@@ -70,11 +70,12 @@ function testcoin.withdraw(player, amount)
                     total_amt = total_amt - 10000
                     total_out = total_out - 10000
                 elseif rem > 0 and stacks < 1 then
+                    local v = coin:get_count()
                     -- remove orig
                     inv:remove_item("testcoin", coin)
                     -- replace old
                     local s = ItemStack("testcoin:coin")
-                    s:set_count(total_out - total_amt)
+                    s:set_count(v - total_amt)
                     inv:add_item("testcoin", s)
                     rem = 0
                     total_amt = 0
@@ -84,5 +85,5 @@ function testcoin.withdraw(player, amount)
         end
     end
 
-    return 1
+    return true
 end
