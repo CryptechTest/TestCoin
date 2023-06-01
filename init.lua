@@ -325,6 +325,7 @@ testcoin.create_transaction = function(from, to, amount)
                     pos.y = pos.y + 0.5
                     minetest.add_item(pos, r)
                 end
+                return true
             end
         end
     end
