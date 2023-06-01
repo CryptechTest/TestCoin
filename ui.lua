@@ -1,5 +1,7 @@
 local ui = unified_inventory
 
+local selected_coin = {}
+
 local function isInteger(str)
     return tonumber(str) ~= nil
 end
@@ -95,7 +97,8 @@ ui.register_page("testcoin_main", {
 
 ui.register_page("testcoin_convert", {
     get_formspec = function(player, perplayer_formspec)
-        --local player_name = player:get_player_name()
+        local player_name = player:get_player_name()
+        local sel = selected_coin[player_name]
 
         local formspec_left = left_menu_section(player, perplayer_formspec)
         local formspec_right = {
@@ -105,20 +108,20 @@ ui.register_page("testcoin_convert", {
             perplayer_formspec.form_header_y + 0.5 .. ";Convert TestCoin]",
             -- first row coins
             "image_button[" ..
-            perplayer_formspec.form_header_x + 5.4 ..
-            "," .. perplayer_formspec.form_header_y + 0.75 .. ";0.6,0.6;testcoin_scc2.png;coin_scc;]",
+            perplayer_formspec.form_header_x + 5.4 .. "," .. perplayer_formspec.form_header_y + 0.75 .. 
+            ";0.6,0.6;testcoin_scc2.png;coin_scc;;true;".. tostring(sel == "scc") ..";]",
             "image_button[" ..
-            perplayer_formspec.form_header_x + 6.2 ..
-            "," .. perplayer_formspec.form_header_y + 0.75 .. ";0.6,0.6;testcoin_mrx.png;coin_mrx;]",
+            perplayer_formspec.form_header_x + 6.2 .. "," .. perplayer_formspec.form_header_y + 0.75 .. 
+            ";0.6,0.6;testcoin_mrx.png;coin_mrx;;true;".. tostring(sel == "mrx") ..";]",
             "image_button[" ..
-            perplayer_formspec.form_header_x + 7.0 ..
-            "," .. perplayer_formspec.form_header_y + 0.75 .. ";0.6,0.6;testcoin_btc.png;coin_btc;]",
+            perplayer_formspec.form_header_x + 7.0 .. "," .. perplayer_formspec.form_header_y + 0.75 .. 
+            ";0.6,0.6;testcoin_btc.png;coin_btc;;true;".. tostring(sel == "btc") ..";]",
             "image_button[" ..
-            perplayer_formspec.form_header_x + 7.8 ..
-            "," .. perplayer_formspec.form_header_y + 0.75 .. ";0.6,0.6;testcoin_eth.png;coin_eth;]",
+            perplayer_formspec.form_header_x + 7.8 .. "," .. perplayer_formspec.form_header_y + 0.75 .. 
+            ";0.6,0.6;testcoin_eth.png;coin_eth;;true;".. tostring(sel == "eth") ..";]",
             "image_button[" ..
-            perplayer_formspec.form_header_x + 8.6 ..
-            "," .. perplayer_formspec.form_header_y + 0.75 .. ";0.6,0.6;testcoin_send.png;coin_send;]",
+            perplayer_formspec.form_header_x + 8.6 .. "," .. perplayer_formspec.form_header_y + 0.75 .. 
+            ";0.6,0.6;testcoin_send.png;coin_send;;true;".. tostring(sel == "send") ..";]",
             -- seconds row coins
             "image_button[" ..
             perplayer_formspec.form_header_x + 5.4 ..
@@ -190,7 +193,7 @@ ui.register_page("testcoin_transfer", {
             "label[" .. perplayer_formspec.form_header_x + 5.15 .. "," ..
             perplayer_formspec.form_header_y + 0.5 .. ";Transfer TestCoin]",
 
-            "image[" .. perplayer_formspec.form_header_x + 7.0 .. "," .. perplayer_formspec.form_header_y + 1.0 ..
+            "image[" .. perplayer_formspec.form_header_x + 6.75 .. "," .. perplayer_formspec.form_header_y + 0.9 ..
             ";1,1;testcoin_coin.png;]",
             
             -- fields
@@ -295,6 +298,49 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
             ui.set_inventory_formspec(player, "testcoin_withdraw")
             return
         end
+    end
+
+    local player_name = player:get_player_name()
+    if fields.coin_scc then
+        selected_coin[player_name] = "scc"
+        ui.set_inventory_formspec(player, "testcoin_convert")
+        return
+    elseif fields.coin_mrx then
+        selected_coin[player_name] = "mrx"
+        ui.set_inventory_formspec(player, "testcoin_convert")
+        return
+    elseif fields.coin_btc then
+        selected_coin[player_name] = "btc"
+        ui.set_inventory_formspec(player, "testcoin_convert")
+        return
+    elseif fields.coin_eth then
+        selected_coin[player_name] = "eth"
+        ui.set_inventory_formspec(player, "testcoin_convert")
+        return
+    elseif fields.coin_send then
+        selected_coin[player_name] = "send"
+        ui.set_inventory_formspec(player, "testcoin_convert")
+        return
+    elseif fields.coin_6 then
+        selected_coin[player_name] = ""
+        ui.set_inventory_formspec(player, "testcoin_convert")
+        return
+    elseif fields.coin_7 then
+        selected_coin[player_name] = ""
+        ui.set_inventory_formspec(player, "testcoin_convert")
+        return
+    elseif fields.coin_8 then
+        selected_coin[player_name] = ""
+        ui.set_inventory_formspec(player, "testcoin_convert")
+        return
+    elseif fields.coin_9 then
+        selected_coin[player_name] = ""
+        ui.set_inventory_formspec(player, "testcoin_convert")
+        return
+    elseif fields.coin_10 then
+        selected_coin[player_name] = ""
+        ui.set_inventory_formspec(player, "testcoin_convert")
+        return
     end
 
     -- handle tabs
