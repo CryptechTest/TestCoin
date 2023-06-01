@@ -189,12 +189,15 @@ ui.register_page("testcoin_transfer", {
             perplayer_formspec.form_header_x + 5.05 .. "," .. perplayer_formspec.form_header_y + 0.2 .. ";4.5,5;#0c0c0c]",
             "label[" .. perplayer_formspec.form_header_x + 5.15 .. "," ..
             perplayer_formspec.form_header_y + 0.5 .. ";Transfer TestCoin]",
+
+            "image[" .. perplayer_formspec.form_header_x + 7.0 .. "," .. perplayer_formspec.form_header_y + 1.0 ..
+            ";1,1;testcoin_coin.png;]",
             
             -- fields
             "field[" .. perplayer_formspec.form_header_x + 5.15 .. "," ..
-            perplayer_formspec.form_header_y + 2.5 .. ";4.3,0.6;input_amount;Amount:;]",
+            perplayer_formspec.form_header_y + 3.5 .. ";4.3,0.6;input_amount;Amount:;]",
             "field[" .. perplayer_formspec.form_header_x + 5.15 .. "," ..
-            perplayer_formspec.form_header_y + 3.5 .. ";4.3,0.6;input_address;Player Name:;]",
+            perplayer_formspec.form_header_y + 2.5 .. ";4.3,0.6;input_address;Player Name:;]",
             -- submit
             "button[" ..
             perplayer_formspec.form_header_x + 5.15 ..
@@ -257,19 +260,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 
     -- deposit to local
     if fields.submit_deposit then
-        local balance = 0
-        local inv = player:get_inventory()
-        local coins = inv:get_list("testcoin_buffer")
-        if #coins > 0 then
-            for _, coin in ipairs(coins) do
-                if coin ~= nil and not coin:is_empty() then
-                    balance = balance + coin:get_count()
-					inv:add_item("testcoin", coin)
-                end
-            end
-        end
-        minetest.log("Found Deposit: " .. balance)
-        inv:set_list("testcoin_buffer", {})
+        testcoin.deposit(player)
         ui.set_inventory_formspec(player, "testcoin_deposit")
         return
     end
@@ -278,8 +269,12 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
     if fields.submit_transfer then
         local amount = fields.input_amount
         local address = fields.input_address
-        minetest.log("Amt: " .. amount .. "  Addr: " .. address)
-        ui.set_inventory_formspec(player, "testcoin_transfer")
+        if isInteger(amount) then
+            minetest.log("Amt: " .. amount .. "  Addr: " .. address)
+            --testcoin.transfer(player, tonumber(amount), address)
+            testcoin.create_transaction(player, minetest.get_player_by_name(address), tonumber(amount))
+            ui.set_inventory_formspec(player, "testcoin_transfer")
+        end
         return
     end
     
@@ -295,8 +290,6 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
     -- withdraw from local
     if fields.submit_withdraw then
         local amount = fields.input_amount
-        minetest.log("Amt: " .. amount)
-
         if isInteger(amount) then
             testcoin.withdraw(player, tonumber(amount))
             ui.set_inventory_formspec(player, "testcoin_withdraw")
