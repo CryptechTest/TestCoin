@@ -275,8 +275,11 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
         if isInteger(amount) then
             minetest.log("Amt: " .. amount .. "  Addr: " .. address)
             --testcoin.transfer(player, tonumber(amount), address)
-            testcoin.create_transaction(player, minetest.get_player_by_name(address), tonumber(amount))
-            ui.set_inventory_formspec(player, "testcoin_transfer")
+            local player = minetest.get_player_by_name(address)
+            if player ~= nil then
+                testcoin.create_transaction(player, player, tonumber(amount))
+                ui.set_inventory_formspec(player, "testcoin_transfer")
+            end
         end
         return
     end
