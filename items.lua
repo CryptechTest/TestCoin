@@ -62,8 +62,8 @@ minetest.register_node("testcoin:asic_miner", {
 	tiles = {
 		"testcoin_asic_miner_top.png",
 		"testcoin_asic_miner_top.png",
-		"testcoin_asic_miner_right.png",
 		"testcoin_asic_miner_left.png",
+		"testcoin_asic_miner_right.png",
 		"testcoin_asic_miner_back.png",
 		"testcoin_asic_miner_front.png"
 	},
