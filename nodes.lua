@@ -156,6 +156,53 @@ local function register_mining_rig(data)
     }
 
     -------------------------------------------------------
+    -------------------------------------------------------
+
+    local function get_asics(inv)
+        local inv_main = inv:get_list("main")
+        local inv_module = inv:get_list("module")
+
+        local miners = {}
+        for i, stack in ipairs(inv_main) do
+            local group = minetest.get_item_group(stack:get_name(), "asic")
+            if group > 0 then
+                local name = stack:get_name()
+                if group == 1 then
+                    -- pow miner
+                    name = "pow_miner"
+                elseif group == 2 then
+                    -- asic miner
+                    name = "asic_miner"
+                end
+                local count = miners[name] or 0
+                miners[name] = count + 1
+            end
+        end
+        return miners
+    end
+
+    local function get_power_draw(miners)
+        local total = 0
+        for miner, count in pairs(miners) do
+            if miner == "pow_miner" then
+                total = total + (count * 1250)
+            elseif miner == "asic_miner" then
+                total = total + (count * 1000)
+            end
+        end
+        return total
+    end
+
+    local function check_has_air(pos)
+        -- check if near air...
+
+    end
+
+    local function do_near_heat(pos, stren)
+        -- heat nearby air
+    end
+
+    -------------------------------------------------------
 
     -- technic run
     local run = function(pos, node)
@@ -165,27 +212,29 @@ local function register_mining_rig(data)
 
         local machine_desc_tier = machine_desc:format(tier)
         local machine_node = data.modname .. ":" .. ltier .. "_" .. machine_name
-        local machine_demand_active = data.demand
-        local machine_demand_idle = data.demand[1] * 0.6
 
         -- Setup meta data if it does not exist.
         if not eu_input then
-            meta:set_int(tier .. "_EU_demand", machine_demand_active[1])
+            meta:set_int(tier .. "_EU_demand", data.demand[1])
             meta:set_int(tier .. "_EU_input", 0)
-            return
-        end
-
-        if not meta:get_int("enabled") then
-            meta:set_int("enabled", 0)
             return
         end
 
         local EU_upgrade, tube_upgrade = 0, 0
         if data.upgrade then
             EU_upgrade, tube_upgrade = technic.handle_machine_upgrades(meta)
+            if data.tube then
+                technic.handle_machine_pipeworks(pos, tube_upgrade)
+            end
         end
 
-        local powered = eu_input >= machine_demand_active[EU_upgrade + 1]
+        local miners = get_asics(inv)
+        local miner_demand = get_power_draw(miners)
+
+        local machine_demand_active = data.demand[EU_upgrade + 1] + miner_demand
+        local machine_demand_idle = (data.demand[EU_upgrade + 1] * 0.6) + miner_demand
+
+        local powered = eu_input >= machine_demand_idle
         if powered then
             meta:set_int("src_time", meta:get_int("src_time") + round(data.speed * 10 * 1.0))
         end
@@ -198,21 +247,18 @@ local function register_mining_rig(data)
                 meta:set_int(tier .. "_EU_demand", 0)
                 meta:set_int("src_time", 0)
                 meta:set_string("formspec", get_formspec(pos, data))
-
                 return
             end
 
             -- technic.swap_node(pos, machine_node .. "_active")
-            meta:set_int(tier .. "_EU_demand", machine_demand_active[EU_upgrade + 1])
+            meta:set_int(tier .. "_EU_demand", machine_demand_active)
 
             if powered then
                 -- technic.swap_node(pos, machine_node .. "_active")
                 meta:set_string("infotext", S("%s Operational"):format(machine_desc_tier))
-                meta:set_int(tier .. "_EU_demand", machine_demand_idle)
+                --meta:set_int(tier .. "_EU_demand", machine_demand_idle)
                 meta:set_int("src_time", 0)
                 meta:set_string("formspec", get_formspec(pos, data))
-                -- apply gravity
-                -- ship_machine.apply_gravity(pos)
                 return
             end
 
@@ -254,6 +300,12 @@ local function register_mining_rig(data)
                 { 0.4375,  -0.5,    -0.5, 0.5,     0.5,     0.5 }, -- NodeBox4
                 { -0.4375, 0.4375,  -0.5, 0.4375,  0.5,     0.5 }, -- NodeBox5
                 { -0.4375, -0.0625, -0.5, 0.4375,  0.0625,  0.5 }  -- NodeBox6
+            }
+        },
+        selection_box = {
+            type = "fixed",
+            fixed = {
+                { -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 }
             }
         },
         mesh = nil,
