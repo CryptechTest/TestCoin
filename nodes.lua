@@ -396,7 +396,7 @@ register_mining_rig({
 -- Entity for item displayed on shelf
 minetest.register_entity("testcoin:item", {
     hp_max = 1,
-    visual = "wielditem",
+    visual = "item",
     visual_size = {
         x = 1,
         y = 1,
