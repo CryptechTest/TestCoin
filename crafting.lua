@@ -1,5 +1,5 @@
 local coin = "testcoin:coin"
-local mining_rig = "testcoin:mining_rig"
+local mining_rig = "testcoin:lv_mining_rig"
 local pow_miner = "testcoin:pow_miner"
 local asic_miner = "testcoin:asic_miner"
 local rig_part = "testcoin:rig_part"
@@ -18,6 +18,10 @@ local ram = "digistuff:ram"
 local heatsink = "digistuff:heatsink"
 
 local rtc = "digilines:rtc"
+
+local circuit = "ship_parts:circuit_standard"
+local acircuit = "ship_parts:circuit_advanced"
+local fpga = "mesecons_fpga:fpga0000"
 
 minetest.register_craft({
     output = rig_part,
@@ -42,15 +46,23 @@ minetest.register_craft({
     recipe = {
         { heatsink, heatsink,       heatsink },
         { ram,      lua_controller, gpu },
-        { digimese, rtc,            digimese },
+        { acircuit, rtc,            acircuit },
     }
 })
 
+minetest.register_craft({
+    output = asic_chip,
+    recipe = {
+        { fpga,     heatsink,       fpga },
+        { acircuit, lua_controller, acircuit },
+        { fpga,     coin,           fpga },
+    }
+})
 
 minetest.register_craft({
     output = asic_miner,
     recipe = {
-        { digimese, lv_air_fan, digimese },
+        { circuit,  lv_air_fan, circuit },
         { ram,      asic_chip,  gpu },
         { digimese, lv_air_fan, digimese },
     }
