@@ -37,10 +37,11 @@ minetest.register_node("testcoin:pow_miner", {
     paramtype2 = "facedir",
     sunlight_propagates = true,
     node_box = {
-        type = "fixed",
-        fixed = {{-0.4375, -0.5, -0.5, 0.0625, 0.5, 0.5} -- NodeBox1
-        }
-    },
+		type = "fixed",
+		fixed = {
+			{-0.0625, -0.5, -0.125, 0.0625, -0.25, 0.125},
+		}
+	},
     groups = {
         cracky = 1,
         oddly_breakable_by_hand = 1,
@@ -66,10 +67,11 @@ minetest.register_node("testcoin:asic_miner", {
     paramtype2 = "facedir",
     sunlight_propagates = true,
     node_box = {
-        type = "fixed",
-        fixed = {{-0.4375, -0.5, -0.5, 0.0625, 0.5, 0.5} -- NodeBox1
-        }
-    },
+		type = "fixed",
+		fixed = {
+			{-0.0625, -0.5, -0.125, 0.0625, -0.25, 0.125},
+		}
+	},
     groups = {
         cracky = 1,
         oddly_breakable_by_hand = 1,

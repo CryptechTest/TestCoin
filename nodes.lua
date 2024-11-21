@@ -21,8 +21,8 @@ end
 
 local function update_shelf(pos)
     -- Remove all objects
-    local objs = minetest.get_objects_inside_radius(pos, 0.75)
-    for _, obj in pairs(objs) do
+    local objs = minetest.objects_inside_radius(pos, 1)
+    for obj in objs do
         obj:remove()
     end
 
@@ -40,7 +40,7 @@ local function update_shelf(pos)
         depth_displacement = 0.25
     end
     if vertical_displacement == 0 then
-        vertical_displacement = 0.2
+        vertical_displacement = 0.5
     end
     minetest.log("displacements: " .. dump(depth_displacement) .. ", " .. dump(vertical_displacement))
     -- Calculate the horizontal displacement. This one is hardcoded so that either 4 or 6
@@ -117,15 +117,11 @@ local function update_shelf(pos)
             if not list[i]:is_empty() then
                 minetest.log("Adding item entity at " .. minetest.pos_to_string(obj_pos))
                 temp_texture = list[i]:get_name()
-                temp_size = 0.8 / max_shown_items
+                temp_size = 0.5625
                 -- minetest.log("Size: "..dump(temp_size))
                 local ent = minetest.add_entity(obj_pos, "testcoin:item")
                 ent:set_properties({
                     wield_item = temp_texture,
-                    visual_size = {
-                        x = 0.8 / max_shown_items,
-                        y = 0.8 / max_shown_items
-                    }
                 })
                 ent:set_yaw(minetest.dir_to_yaw(minetest.facedir_to_dir(node.param2)))
             end
@@ -305,9 +301,11 @@ local function register_mining_rig(data)
         can_dig = technic.machine_can_dig,
         on_dig = function(pos, node, digger)
             -- Clear all object objects
-            local objs = minetest.get_objects_inside_radius(pos, 0.7)
-            for _, obj in pairs(objs) do
-                obj:remove()
+            local objs = minetest.objects_inside_radius(pos, 1)
+            for obj in objs do
+                if obj:get_luaentity() and obj:get_luaentity().name == "testcoin:item" then
+                    obj:remove()
+                end
             end
             -- Pop-up items
             minetest.add_item(pos, node.name)
@@ -400,8 +398,9 @@ minetest.register_entity("testcoin:item", {
     hp_max = 1,
     visual = "wielditem",
     visual_size = {
-        x = 0.3,
-        y = 0.3
+        x = 1,
+        y = 1,
+        z = 1
     },
     collisionbox = { 0, 0, 0, 0, 0, 0 },
     physical = false,
@@ -439,7 +438,8 @@ minetest.register_entity("testcoin:item", {
         if self.visualsize ~= nil then
             self.visual_size = {
                 x = self.visualsize,
-                y = self.visualsize
+                y = self.visualsize,
+                z = self.visualsize
             }
         end
 
