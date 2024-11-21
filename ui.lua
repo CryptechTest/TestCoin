@@ -65,6 +65,7 @@ ui.register_page("testcoin_main", {
         end
         local formspec_left = left_menu_section(player, perplayer_formspec)
         local formspec_right = {
+            --[[
             "box[" ..
             perplayer_formspec.form_header_x + 5.05 .. "," .. perplayer_formspec.form_header_y + 0.2 .. ";4.5,5;#0c0c0c]",
             "label[" .. perplayer_formspec.form_header_x + 5.15 .. "," ..
@@ -88,7 +89,7 @@ ui.register_page("testcoin_main", {
             perplayer_formspec.form_header_y + 4.4 .. ";Mempool]",
             "label[" .. perplayer_formspec.form_header_x + 5.15 .. "," ..
             perplayer_formspec.form_header_y + 4.8 .. ";Pending Tx: " .. #testcoin.mempool .. "]",
-
+            ]]--
         }
 
         return { formspec = table.concat(formspec_left) .. table.concat(formspec_right) }
@@ -140,14 +141,18 @@ ui.register_page("testcoin_convert", {
             "," .. perplayer_formspec.form_header_y + 1.5 .. ";0.6,0.6;testcoin_coin.png;coin_10;]",
             -- fields
             "field[" .. perplayer_formspec.form_header_x + 5.15 .. "," ..
-            perplayer_formspec.form_header_y + 2.5 .. ";4.3,0.6;input_amount;Amount:;]",
+            perplayer_formspec.form_header_y + 2.5 .. ";4.3,0.6;input_amount;TestCoin Amount:;]",
             "field[" .. perplayer_formspec.form_header_x + 5.15 .. "," ..
             perplayer_formspec.form_header_y + 3.5 .. ";4.3,0.6;input_address;Address:;]",
             -- submit
             "button[" ..
             perplayer_formspec.form_header_x + 5.15 ..
             "," .. perplayer_formspec.form_header_y + 4.2 .. ";4.3,0.8;submit_convert;Submit]",
-
+            "tooltip[coin_scc;1 TestCoin per 0.000096 SCC;]",
+            "tooltip[coin_mrx;1 TestCoin per 7.56 MRX;]",
+            "tooltip[coin_btc;1 TestCoin per 0.000000001 BTC;]",
+            "tooltip[coin_eth;1 TestCoin per 0.000000031 ETH;]",
+            "tooltip[coin_send;1 TestCoin per 10 SEND;]"
         }
 
         return { formspec = table.concat(formspec_left) .. table.concat(formspec_right) }
@@ -198,7 +203,7 @@ ui.register_page("testcoin_transfer", {
             
             -- fields
             "field[" .. perplayer_formspec.form_header_x + 5.15 .. "," ..
-            perplayer_formspec.form_header_y + 3.5 .. ";4.3,0.6;input_amount;Amount:;]",
+            perplayer_formspec.form_header_y + 3.5 .. ";4.3,0.6;input_amount;TestCoin Amount:;]",
             "field[" .. perplayer_formspec.form_header_x + 5.15 .. "," ..
             perplayer_formspec.form_header_y + 2.5 .. ";4.3,0.6;input_address;Player Name:;]",
             -- submit
@@ -224,7 +229,7 @@ ui.register_page("testcoin_withdraw", {
 
             -- fields
             "field[" .. perplayer_formspec.form_header_x + 5.15 .. "," ..
-            perplayer_formspec.form_header_y + 1.5 .. ";4.3,0.6;input_amount;Amount:;]",
+            perplayer_formspec.form_header_y + 1.5 .. ";4.3,0.6;input_amount;TestCoin Amount:;]",
             -- submit
             "button[" ..
             perplayer_formspec.form_header_x + 5.15 ..
@@ -273,17 +278,27 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
         local amount = fields.input_amount
         local address = fields.input_address
         if isInteger(amount) then
-            minetest.log("Amt: " .. amount .. "  Addr: " .. address)
-            --testcoin.transfer(player, tonumber(amount), address)
-            local player = minetest.get_player_by_name(address)
-            if player ~= nil then
-                testcoin.create_transaction(player, player, tonumber(amount))
-                ui.set_inventory_formspec(player, "testcoin_transfer")
+            local receiver = minetest.get_player_by_name(address)
+            if receiver ~= nil then
+                local success, message = testcoin.create_transaction(player, receiver, tonumber(amount))
+                if not success then                    
+                    minetest.chat_send_player(player:get_player_name(), message)
+                    return
+                else
+                    minetest.chat_send_player(address, "Received " .. amount .. " TestCoin from " .. player:get_player_name())
+                    minetest.chat_send_player(player:get_player_name(), "Sent " .. amount .. " TestCoin to " .. address)
+                
+                    ui.set_inventory_formspec(player, "testcoin_transfer")
+                    return
+                end
+            else
+                minetest.chat_send_player(player:get_player_name(), "Player not found")
             end
+        else
+            minetest.chat_send_player(player:get_player_name(), "Invalid amount")
         end
-        return
     end
-    
+
     -- convert to real coin
     if fields.submit_convert then
         local amount = fields.input_amount

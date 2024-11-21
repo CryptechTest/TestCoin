@@ -302,34 +302,51 @@ end
 testcoin.create_transaction = function(from, to, amount)
     local finv = from:get_inventory()
     local tinv = to:get_inventory()
-    if amount <= 0 then
-        return false
+    if math.floor(amount) <= 0 then
+        return false, "Invalid amount"
     end
-    if finv and not finv:is_empty("testcoin") and tinv then
-        local balance = 0
-        local coins = finv:get_list("testcoin")
-        if #coins > 0 then
-            for _, coin in ipairs(coins) do
-                if coin ~= nil and not coin:is_empty() then
-                    balance = balance + coin:get_count()
-                end
-            end
-            if balance >= math.floor(amount) then
-                table.insert(testcoin.mempool,
-                    { from = from:get_player_name(), to = to:get_player_name(), amount = math.floor(amount) })
-                local stack = ItemStack("testcoin:coin", math.floor(amount))
-                local c = finv:remove_item("testcoin", stack)
+    if finv and tinv then
+        if finv:is_empty("testcoin") then
+            return false, "Insufficient funds"
+        end
+        local balance = testcoin.get_balance(from)
+        if balance < math.floor(amount) then
+            return false, "Insufficient funds"
+        end
+
+        if balance >= math.floor(amount) then
+            table.insert(testcoin.mempool,
+                { from = from:get_player_name(), to = to:get_player_name(), amount = math.floor(amount) })
+            local stacks = math.floor(amount / 10000)
+            local rem = amount % 10000
+            for _ = 1, stacks do
+                local s = ItemStack({ name = "testcoin:coin", count = 10000 })
+                local c = finv:remove_item("testcoin", s)
                 local r = tinv:add_item("testcoin", c)
                 if r and not r:is_empty() then
                     local pos = to:get_pos()
                     pos.y = pos.y + 0.5
                     minetest.add_item(pos, r)
                 end
-                return true
             end
+            if rem > 0 then
+                local s = ItemStack("testcoin:coin")
+                s:set_count(rem)
+                local c = finv:remove_item("testcoin", s)
+                local r = tinv:add_item("testcoin", c)
+                if r and not r:is_empty() then
+                    local pos = to:get_pos()
+                    pos.y = pos.y + 0.5
+                    minetest.add_item(pos, r)
+                end
+            end
+            return true, "Transaction complete"
+        else
+            return false, "Insufficient funds"
         end
+    else
+        return false, "Invalid transaction"
     end
-    return false
 end
 
 

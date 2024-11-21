@@ -1,14 +1,15 @@
 
 -- get player wallet balance
-local function get_balance(player)
+function testcoin.get_balance(player)
     local balance = 0
     local inv = player:get_inventory()
+    if inv == nil or inv:is_empty("testcoin") then
+        return balance
+    end
     local coins = inv:get_list("testcoin")
-    if #coins > 0 then
-        for _, coin in ipairs(coins) do
-            if coin ~= nil and not coin:is_empty() then
-                balance = balance + coin:get_count()
-            end
+    for _, coin in ipairs(coins) do
+        if coin ~= nil and not coin:is_empty() then
+            balance = balance + coin:get_count()
         end
     end
     return balance
@@ -33,119 +34,54 @@ end
 
 -- withdraw from local wallet to inventory
 function testcoin.withdraw(player, amount)
-    local stacks = amount / 10000
-    local rem = amount % 10000
+    local stacks = math.floor(math.floor(amount) / 10000)
+    local rem = math.floor(amount) % 10000
 
-    minetest.log("stacks: " .. stacks .. "  rem: " .. rem )
-
-    local balance = get_balance(player)
-    if amount > balance then
-       return false
+    local balance = testcoin.get_balance(player)
+    if math.floor(amount) > balance then
+       return false, "Insufficient Funds"
     end
     
-    local total_amt = amount
-    local total_out = balance
     local inv = player:get_inventory()
-
-    if stacks >= 1 then
-        for i=1, stacks do
-            local s = ItemStack("testcoin:coin")
-            s:set_count(10000)
-            inv:add_item("main", s)
+    local over = {}
+    for i=1, stacks do
+        local s = ItemStack({name = "testcoin:coin", count = 10000})
+        local o = inv:add_item("main", s)
+        if o:get_count() > 0 then
+            table.insert(over, o)
         end
     end
     if rem > 0 then
-        local s = ItemStack("testcoin:coin")
-        s:set_count(rem)
-        inv:add_item("main", s)
+        local s = ItemStack({name = "testcoin:coin", count = rem})
+        local o = inv:add_item("main", s)
+        if o:get_count() > 0 then
+            table.insert(over, o)
+        end
     end
-    
+    for _, o in ipairs(over) do
+        local pos = player:get_pos()
+        pos.y = pos.y + 1
+        minetest.add_item(pos, o)
+    end
+    local out = 0
     local coins = inv:get_list("testcoin")
     if #coins > 0 then
-        for _, coin in ipairs(coins) do
-            if coin ~= nil and not coin:is_empty() then
-                if stacks >= 1 and coin:get_count() == 10000 then
+        for i, coin in ipairs(coins) do
+            if out < math.floor(amount) and coin ~= nil and not coin:is_empty() then
+                local count = coin:get_count()
+                if out + count <= math.floor(amount) then
+                    out = out + count
                     inv:remove_item("testcoin", coin)
-                    stacks = stacks - 1
-                    total_amt = total_amt - 10000
-                    total_out = total_out - 10000
-                elseif rem > 0 and stacks < 1 then
-                    local v = coin:get_count()
-                    -- remove orig
-                    inv:remove_item("testcoin", coin)
-                    -- replace old
-                    local s = ItemStack("testcoin:coin")
-                    s:set_count(v - total_amt)
-                    inv:add_item("testcoin", s)
-                    rem = 0
-                    total_amt = 0
-                    total_out = 0
+                else
+                    local diff = math.floor(amount) - out
+                    coin:set_count(count - diff)
+                    inv:set_stack("testcoin", i, coin)
+                    out = out + diff
                 end
             end
         end
     end
 
-    return true
+    return true, "Withdraw of " .. amount .. " TestCoin complete"
 end
 
-function testcoin.transfer(player_from, amount, player_name_to)
-    local player_to = minetest.get_player_by_name(player_name_to)
-
-    local stacks = amount / 10000
-    local rem = amount % 10000
-
-    minetest.log("stacks: " .. stacks .. "  rem: " .. rem )
-
-    local balance = get_balance(player_from)
-    if amount > balance then
-       return false
-    end
-    
-    local total_amt = amount
-    local total_out = balance
-    local inv_from = player_from:get_inventory()
-    local inv_to = player_to:get_inventory()
-
-    if stacks >= 1 then
-        for i=1, stacks do
-            local s = ItemStack("testcoin:coin")
-            s:set_count(10000)
-            inv_to:add_item("testcoin", s)
-        end
-    end
-    if rem > 0 then
-        local s = ItemStack("testcoin:coin")
-        s:set_count(rem)
-        inv_to:add_item("testcoin", s)
-    end
-    
-    local coins = inv_from:get_list("testcoin")
-    if #coins > 0 then
-        for _, coin in ipairs(coins) do
-            if coin ~= nil and not coin:is_empty() then
-                if stacks >= 1 and coin:get_count() == 10000 then
-                    inv_from:remove_item("testcoin", coin)
-                    stacks = stacks - 1
-                    total_amt = total_amt - 10000
-                    total_out = total_out - 10000
-                elseif rem > 0 and stacks < 1 then
-                    local v = coin:get_count()
-                    -- remove orig
-                    inv_from:remove_item("testcoin", coin)
-                    -- replace old
-                    local s = ItemStack("testcoin:coin")
-                    s:set_count(v - total_amt)
-                    inv_from:add_item("testcoin", s)
-                    rem = 0
-                    total_amt = 0
-                    total_out = 0
-                end
-            end
-        end
-    end
-
-    minetest.chat_send_player(player_to:get_name(), "Received " .. amount .. " Coins from " .. player_from:get_name())
-    minetest.chat_send_player(player_from:get_name(), "Sent " .. amount .. " Coins to " .. player_to:get_name())
-
-    return true
-end
