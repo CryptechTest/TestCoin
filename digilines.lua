@@ -1,5 +1,5 @@
 testcoin.rig_digiline_effector = function(pos, node, channel, msg)
-    local m = minetest.get_meta(pos)
+    local m = core.get_meta(pos)
     local set_channel = m:get_string("digilines_channel")
 
     local msgt = type(msg)
@@ -13,7 +13,7 @@ testcoin.rig_digiline_effector = function(pos, node, channel, msg)
     end
 
     if msg.command == "status" then
-        local meta = minetest.get_meta(pos)
+        local meta = core.get_meta(pos)
         digilines.receptor_send(pos, digilines.rules.default, channel, {
             command = msg.command,
             hashrate = meta:get_int("hashrate"),
@@ -23,12 +23,12 @@ testcoin.rig_digiline_effector = function(pos, node, channel, msg)
     end
 
     if msg.command == "enable" then
-        local meta = minetest.get_meta(pos)
+        local meta = core.get_meta(pos)
         meta:set_int("enabled", 1)
     end
 
     if msg.command == "disable" then
-        local meta = minetest.get_meta(pos)
+        local meta = core.get_meta(pos)
         meta:set_int("enabled", 0)
     end
 

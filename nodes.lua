@@ -1,5 +1,5 @@
 local function get_formspec(pos, data)
-    local meta = minetest.get_meta(pos)
+    local meta = core.get_meta(pos)
     local def_chan = meta:get_string("digilines_channel")
     local hashrate = meta:get_string("hashrate")
 
@@ -21,18 +21,18 @@ end
 
 local function update_shelf(pos)
     -- Remove all objects
-    local objs = minetest.objects_inside_radius(pos, 1)
+    local objs = core.objects_inside_radius(pos, 1)
     for obj in objs do
         obj:remove()
     end
 
-    local node = minetest.get_node(pos)
-    local meta = minetest.get_meta(pos)
+    local node = core.get_node(pos)
+    local meta = core.get_meta(pos)
     -- Calculate directions
-    local node_dir = minetest.facedir_to_dir(((node.param2 + 2) % 4))
-    local obj_dir = minetest.facedir_to_dir(get_obj_dir(node.param2))
+    local node_dir = core.facedir_to_dir(((node.param2 + 2) % 4))
+    local obj_dir = core.facedir_to_dir(get_obj_dir(node.param2))
     -- Get maximum number of shown items (4 or 6)
-    local max_shown_items = minetest.get_item_group(node.name, "itemshelf_shown_items")
+    local max_shown_items = core.get_item_group(node.name, "itemshelf_shown_items")
     -- Get custom displacement properties
     local depth_displacement = meta:get_float("testcoin:depth_displacement") or 0
     local vertical_displacement = meta:get_float("testcoin:vertical_displacement") or 0
@@ -42,7 +42,7 @@ local function update_shelf(pos)
     if vertical_displacement == 0 then
         vertical_displacement = 0.5
     end
-    minetest.log("displacements: " .. dump(depth_displacement) .. ", " .. dump(vertical_displacement))
+    core.log("displacements: " .. dump(depth_displacement) .. ", " .. dump(vertical_displacement))
     -- Calculate the horizontal displacement. This one is hardcoded so that either 4 or 6
     -- items are properly displayed.
     local horizontal_displacement = 0.715
@@ -85,7 +85,7 @@ local function update_shelf(pos)
     }
 
     -- Calculate amount of objects in the inventory
-    local inv = minetest.get_meta(pos):get_inventory()
+    local inv = core.get_meta(pos):get_inventory()
     local list = inv:get_list("main")
     local obj_count = 0
     for key, itemstack in pairs(list) do
@@ -93,7 +93,7 @@ local function update_shelf(pos)
             obj_count = obj_count + 1
         end
     end
-    minetest.log("Found " .. dump(obj_count) .. " items on shelf inventory")
+    core.log("Found " .. dump(obj_count) .. " items on shelf inventory")
     if obj_count > 0 then
         local shown_items = math.min(#list, max_shown_items)
         for i = 1, shown_items do
@@ -115,15 +115,15 @@ local function update_shelf(pos)
             }
 
             if not list[i]:is_empty() then
-                minetest.log("Adding item entity at " .. minetest.pos_to_string(obj_pos))
+                core.log("Adding item entity at " .. core.pos_to_string(obj_pos))
                 temp_texture = list[i]:get_name()
                 temp_size = 0.5625
-                -- minetest.log("Size: "..dump(temp_size))
-                local ent = minetest.add_entity(obj_pos, "testcoin:item")
+                -- core.log("Size: "..dump(temp_size))
+                local ent = core.add_entity(obj_pos, "testcoin:item")
                 ent:set_properties({
                     wield_item = temp_texture,
                 })
-                ent:set_yaw(minetest.dir_to_yaw(minetest.facedir_to_dir(node.param2)))
+                ent:set_yaw(core.dir_to_yaw(core.facedir_to_dir(node.param2)))
             end
         end
     end
@@ -164,7 +164,7 @@ local function register_mining_rig(data)
 
         local miners = {}
         for i, stack in ipairs(inv_main) do
-            local group = minetest.get_item_group(stack:get_name(), "asic")
+            local group = core.get_item_group(stack:get_name(), "asic")
             if group > 0 then
                 local name = stack:get_name()
                 if group == 1 then
@@ -206,7 +206,7 @@ local function register_mining_rig(data)
 
     -- technic run
     local run = function(pos, node)
-        local meta = minetest.get_meta(pos)
+        local meta = core.get_meta(pos)
         local inv = meta:get_inventory()
         local eu_input = meta:get_int(tier .. "_EU_input")
 
@@ -285,7 +285,7 @@ local function register_mining_rig(data)
     -- register machine node
 
     local node_name = data.modname .. ":" .. ltier .. "_" .. machine_name
-    minetest.register_node(node_name, {
+    core.register_node(node_name, {
         description = data.machine_desc,
         tiles = { ltier .. "_" .. tmachine_name .. "_top.png", ltier .. "_" .. tmachine_name .. "_bottom.png",
             ltier .. "_" .. tmachine_name .. "_side.png", ltier .. "_" .. tmachine_name .. "_side.png",
@@ -313,8 +313,8 @@ local function register_mining_rig(data)
         groups = groups,
         sounds = default.node_sound_metal_defaults(),
         on_construct = function(pos)
-            local meta = minetest.get_meta(pos)
-            minetest.log(dump(meta))
+            local meta = core.get_meta(pos)
+            core.log(dump(meta))
             -- Initialize data
             meta:set_int("enabled", 1)
             meta:set_int("hashrate", 0)
@@ -327,19 +327,19 @@ local function register_mining_rig(data)
             meta:set_string("formspec", get_formspec(pos))
         end,
         allow_metadata_inventory_move = function(pos, from_list, from_index, to_list, to_index, count, player)
-            if minetest.is_protected(pos, player:get_player_name()) then
+            if core.is_protected(pos, player:get_player_name()) then
                 return 0
             end
             return technic.machine_inventory_move(pos, from_list, from_index, to_list, to_index, count, player)
         end,
         allow_metadata_inventory_put = function(pos, listname, index, stack, player)
-            if minetest.is_protected(pos, player:get_player_name()) then
+            if core.is_protected(pos, player:get_player_name()) then
                 return 0
             end
             return technic.machine_inventory_put(pos, listname, index, stack, player)
         end,
         allow_metadata_inventory_take = function(pos, listname, index, stack, player)
-            if minetest.is_protected(pos, player:get_player_name()) then
+            if core.is_protected(pos, player:get_player_name()) then
                 return 0
             end
             return technic.machine_inventory_take(pos, listname, index, stack, player)
@@ -353,15 +353,15 @@ local function register_mining_rig(data)
         can_dig = technic.machine_can_dig,
         on_dig = function(pos, node, digger)
             -- Clear all object objects
-            local objs = minetest.objects_inside_radius(pos, 1)
+            local objs = core.objects_inside_radius(pos, 1)
             for obj in objs do
                 if obj:get_luaentity() and obj:get_luaentity().name == "testcoin:item" then
                     obj:remove()
                 end
             end
             -- Pop-up items
-            minetest.add_item(pos, node.name)
-            local meta = minetest.get_meta(pos)
+            core.add_item(pos, node.name)
+            local meta = core.get_meta(pos)
             local list = meta:get_inventory():get_list("main")
             for _, item in pairs(list) do
                 local drop_pos = {
@@ -369,14 +369,14 @@ local function register_mining_rig(data)
                     y = pos.y,
                     z = math.random(pos.z - 0.5, pos.z + 0.5)
                 }
-                minetest.add_item(drop_pos, item:to_string())
+                core.add_item(drop_pos, item:to_string())
             end
             -- Remove node
-            minetest.remove_node(pos)
+            core.remove_node(pos)
         end,
         on_blast = function(pos)
-            minetest.add_item(pos, minetest.get_node(pos).name)
-            local meta = minetest.get_meta(pos)
+            core.add_item(pos, core.get_node(pos).name)
+            local meta = core.get_meta(pos)
             local list = meta:get_inventory():get_list("main")
             for _, item in pairs(list) do
                 local drop_pos = {
@@ -384,17 +384,17 @@ local function register_mining_rig(data)
                     y = pos.y,
                     z = math.random(pos.z - 0.5, pos.z + 0.5)
                 }
-                minetest.add_item(drop_pos, item:to_string())
+                core.add_item(drop_pos, item:to_string())
             end
             -- Remove node
-            minetest.remove_node(pos)
+            core.remove_node(pos)
             return nil
         end,
         -- Screwdriver support
         on_rotate = function(pos, node, user, mode, new_param2) -- {name = node.name, param1 = node.param1, param2 = node.param2}, user, mode, new_param2)
             -- Rotate
             node.param2 = new_param2
-            minetest.swap_node(pos, node)
+            core.swap_node(pos, node)
             update_shelf(pos)
             -- Disable rotation by screwdriver
             return false
@@ -403,8 +403,8 @@ local function register_mining_rig(data)
             if fields.quit then
                 return
             end
-            local node = minetest.get_node(pos)
-            local meta = minetest.get_meta(pos)
+            local node = core.get_node(pos)
+            local meta = core.get_meta(pos)
 
             if fields.on then
                 meta:set_int("enabled", 1)
@@ -446,7 +446,7 @@ register_mining_rig({
 })
 
 -- Entity for item displayed on shelf
-minetest.register_entity("testcoin:item", {
+core.register_entity("testcoin:item", {
     hp_max = 1,
     visual = "item",
     visual_size = {

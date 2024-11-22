@@ -65,7 +65,13 @@ ui.register_page("testcoin_main", {
         end
         local formspec_left = left_menu_section(player, perplayer_formspec)
         local formspec_right = {
+            "box[" ..
+            perplayer_formspec.form_header_x + 5.05 .. "," .. perplayer_formspec.form_header_y + 0.2 .. ";4.5,5;#0c0c0c]",
+            "image[" .. perplayer_formspec.form_header_x + 5.05 .. "," .. perplayer_formspec.form_header_y + 0.45 ..
+            ";4.5,4.5;testcoin_coin.png;]",     
+        }
             --[[
+            {
             "box[" ..
             perplayer_formspec.form_header_x + 5.05 .. "," .. perplayer_formspec.form_header_y + 0.2 .. ";4.5,5;#0c0c0c]",
             "label[" .. perplayer_formspec.form_header_x + 5.15 .. "," ..
@@ -89,8 +95,8 @@ ui.register_page("testcoin_main", {
             perplayer_formspec.form_header_y + 4.4 .. ";Mempool]",
             "label[" .. perplayer_formspec.form_header_x + 5.15 .. "," ..
             perplayer_formspec.form_header_y + 4.8 .. ";Pending Tx: " .. #testcoin.mempool .. "]",
-            ]]--
-        }
+            
+        }]]--
 
         return { formspec = table.concat(formspec_left) .. table.concat(formspec_right) }
     end,

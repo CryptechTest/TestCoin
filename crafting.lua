@@ -23,7 +23,7 @@ local circuit = "ship_parts:circuit_standard"
 local acircuit = "ship_parts:circuit_advanced"
 local fpga = "mesecons_fpga:fpga0000"
 
-minetest.register_craft({
+core.register_craft({
     output = rig_part,
     recipe = {
         { coin, coin,           coin },
@@ -32,7 +32,7 @@ minetest.register_craft({
     }
 })
 
-minetest.register_craft({
+core.register_craft({
     output = mining_rig,
     recipe = {
         { rig_part, rig_part, rig_part },
@@ -41,7 +41,7 @@ minetest.register_craft({
     }
 })
 
-minetest.register_craft({
+core.register_craft({
     output = pow_miner,
     recipe = {
         { heatsink, heatsink,       heatsink },
@@ -50,7 +50,7 @@ minetest.register_craft({
     }
 })
 
-minetest.register_craft({
+core.register_craft({
     output = asic_chip,
     recipe = {
         { fpga,     heatsink,       fpga },
@@ -59,7 +59,7 @@ minetest.register_craft({
     }
 })
 
-minetest.register_craft({
+core.register_craft({
     output = asic_miner,
     recipe = {
         { circuit,  lv_air_fan, circuit },
