@@ -1,5 +1,7 @@
 local coin = "testcoin:coin"
-local mining_rig = "testcoin:lv_mining_rig"
+local mining_rig_lv = "testcoin:lv_mining_rig"
+local mining_rig_mv = "testcoin:mv_mining_rig"
+local mining_rig_hv = "testcoin:hv_mining_rig"
 local pow_miner = "testcoin:pow_miner"
 local asic_miner = "testcoin:asic_miner"
 local rig_part = "testcoin:rig_part"
@@ -23,6 +25,14 @@ local circuit = "ship_parts:circuit_standard"
 local acircuit = "ship_parts:circuit_advanced"
 local fpga = "mesecons_fpga:fpga0000"
 
+local nick = "ctg_world:nickel_ingot"
+local tita = "ctg_world:titanium_ingot"
+local hidum = "ctg_world:hiduminium_stock"
+
+local lv_tr = "technic:lv_transformer"
+local mv_tr = "technic:mv_transformer"
+local hv_tr = "technic:hv_transformer"
+
 core.register_craft({
     output = rig_part,
     recipe = {
@@ -33,18 +43,36 @@ core.register_craft({
 })
 
 core.register_craft({
-    output = mining_rig,
+    output = mining_rig_lv,
+    recipe = {
+        { rig_part, nick, rig_part },
+        { rig_part, lv_cable, rig_part },
+        { rig_part, lv_tr, rig_part },
+    }
+})
+
+core.register_craft({
+    output = mining_rig_mv,
+    recipe = {
+        { rig_part, tita, rig_part },
+        { rig_part, mining_rig_lv, rig_part },
+        { rig_part, mv_tr, rig_part },
+    }
+})
+
+core.register_craft({
+    output = mining_rig_hv,
     recipe = {
         { rig_part, rig_part, rig_part },
-        { rig_part, lv_cable, rig_part },
-        { rig_part, rig_part, rig_part },
+        { hidum, mining_rig_mv, hidum },
+        { rig_part, hv_tr, rig_part },
     }
 })
 
 core.register_craft({
     output = pow_miner,
     recipe = {
-        { heatsink, heatsink,       heatsink },
+        { heatsink, digimese,       heatsink },
         { ram,      lua_controller, gpu },
         { acircuit, rtc,            acircuit },
     }
