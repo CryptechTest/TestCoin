@@ -13,6 +13,16 @@ local function round(v)
     return math.floor(v + 0.5)
 end
 
+local function play_sound_fan(pos)
+    minetest.sound_play("testcoin_miner_fan", {
+        pos = pos,
+        gain = math.random(0.21, 0.47),
+        pitch = math.random(0.86, 1.08),
+        fade = 3,
+        max_hear_distance = 10
+    })
+end
+
 -------------------------------------------------------
 
 -- register_mining_rig
@@ -360,6 +370,10 @@ local function register_mining_rig(data)
                 meta:set_string("infotext", S("%s Operational"):format(machine_desc_tier))
             elseif powered then
                 meta:set_string("infotext", S("%s Initializing"):format(machine_desc_tier))
+            end
+
+            if math.random(0, 2) == 0 then
+                play_sound_fan(pos)
             end
 
             -- meta:set_string("infotext", S("%s Active"):format(machine_desc_tier))
