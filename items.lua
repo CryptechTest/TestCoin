@@ -76,7 +76,8 @@ core.register_node("testcoin:pow_miner_broke", {
         cracky = 1,
         oddly_breakable_by_hand = 1,
         asic = 1,
-        asic_broken = 1
+        asic_broken = 1,
+        not_in_creative_inventory = 1
     },
     sounds = default.node_sound_metal_defaults()
 })
@@ -137,7 +138,8 @@ core.register_node("testcoin:asic_miner_broke", {
         cracky = 1,
         oddly_breakable_by_hand = 1,
         asic = 2,
-        asic_broken = 2
+        asic_broken = 2,
+        not_in_creative_inventory = 1
     },
     sounds = default.node_sound_metal_defaults()
 })
