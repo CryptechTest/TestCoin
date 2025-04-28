@@ -182,7 +182,9 @@ local function create_block(miner, staker, data)
     -- add coinbase rewards
     table.insert(tx_data.vin, { hash = testcoin.vtx_coinbase.ref, amount = 0 })
     table.insert(tx_data.vout, { hash = miner.hash_id, amount = 10 })
-    table.insert(tx_data.vout, { hash = staker.hash, amount = 10 })
+    if staker then
+        table.insert(tx_data.vout, { hash = staker.hash, amount = 10 })
+    end
     -- add standard tx...
     for _, v in pairs(data.vin or {}) do
         if v.amount > 0 then
@@ -434,10 +436,14 @@ local function shuffle(t)
     return tbl
 end
 
-local function is_air_node(pos)
+local function is_air_node(pos, use_hot)
+    use_hot = use_hot or false
     local node = core.get_node(pos)
     local g_atmos = core.get_item_group(node.name, "atmosphere")
     if node.name == "air" or g_atmos == 1 or g_atmos == 10 then
+        return true
+    end
+    if use_hot and g_atmos == 11 then
         return true
     end
     return false
@@ -484,7 +490,7 @@ local function traverse_atmos_local(pos_orig, pos, r)
         return nodes;
     end
     for i, cur_pos in pairs(shuffle(positions)) do
-        if is_air_node(cur_pos) then
+        if is_air_node(cur_pos, true) then
             nodes[str_pos(cur_pos)] = cur_pos
         end
     end
