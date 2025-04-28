@@ -3,8 +3,15 @@ local modpath = core.get_modpath(modname)
 local S = core.get_translator(modname)
 testcoin = {}
 testcoin.ver = '0.0.1'
-testcoin.miner_position = {}
+testcoin.chain_tip = {
+    height = 1,
+    hash = "8e80b4c977b05f8667848b823abcaeeeeee500eb10ade84ac2a4734bb410f5cb",
+    prev = "";
+    timestamp = ""
+}
+testcoin.miners_active = {}
 testcoin.get_translator = S
+dofile(modpath .. "/block_storage.lua")
 dofile(modpath .. "/functions.lua")
 dofile(modpath .. "/items.lua")
 dofile(modpath .. "/digilines.lua")
@@ -32,3 +39,19 @@ local loot = {
 }
 
 dungeon_loot.register(loot)
+
+-- period is in seconds
+local function run_periodically(period, func)
+	local timer = 0
+	core.register_globalstep(function(dtime)
+		timer = timer + dtime
+		if timer > period then
+			func()
+			timer = 0
+		end
+	end)
+end
+
+run_periodically(60, function()
+	testcoin.run_chain()
+end)

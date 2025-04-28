@@ -1,9 +1,20 @@
 local ui = unified_inventory
 
 local selected_coin = {}
+local coin_rate = {}
 
 local function isInteger(str)
     return tonumber(str) ~= nil
+end
+
+local function register_coin_rates()
+    coin_rate['scc'] = 0.000096;
+    coin_rate['mrx'] = 7.56;
+    coin_rate['btc'] = 0.000000001;
+    coin_rate['eth'] = 0.000000031;
+    coin_rate['send'] = 10;
+    coin_rate['pep'] = 0.5;
+    coin_rate['pivx'] = 0.000001;
 end
 
 ui.register_button("testcoin_main", {
@@ -68,7 +79,30 @@ ui.register_page("testcoin_main", {
             "box[" ..
             perplayer_formspec.form_header_x + 5.05 .. "," .. perplayer_formspec.form_header_y + 0.2 .. ";4.5,5;#0c0c0c]",
             "image[" .. perplayer_formspec.form_header_x + 5.05 .. "," .. perplayer_formspec.form_header_y + 0.45 ..
-            ";4.5,4.5;testcoin_coin.png;]",     
+            ";4.5,4.5;testcoin_coin.png;]",
+            
+            "label[" .. perplayer_formspec.form_header_x + 5.15 .. "," ..
+            perplayer_formspec.form_header_y + 0.5 .. ";Blockchain Info]",
+            "label[" .. perplayer_formspec.form_header_x + 5.15 .. "," ..
+            perplayer_formspec.form_header_y + 1 .. ";Height: " .. testcoin.chain_tip.height .. "]",
+            "label[" .. perplayer_formspec.form_header_x + 5.15 .. "," ..
+            perplayer_formspec.form_header_y + 1.3 .. ";Timestamp: " .. testcoin.chain_tip.timestamp .. "]",
+            "field[" .. perplayer_formspec.form_header_x + 5.15 .. "," ..
+            perplayer_formspec.form_header_y + 1.75 ..
+            ";4.3,0.8;testcoin_blockhash;Blockhash:;" .. testcoin.chain_tip.hash .. "]",
+            "field[" .. perplayer_formspec.form_header_x + 5.15 .. "," ..
+            perplayer_formspec.form_header_y + 2.9 ..
+            ";4.3,0.8;testcoin_prevhash;Prevhash:;" .. testcoin.chain_tip.prev .. "]",
+            --[["label[" .. perplayer_formspec.form_header_x + 5.15 .. "," ..
+            perplayer_formspec.form_header_y + 3.9 ..
+            ";Tx Count: " .. #testcoin.chain[#testcoin.chain].transactions .. "]",
+            "label[" .. perplayer_formspec.form_header_x + 5.15 .. "," ..
+            perplayer_formspec.form_header_y + 4.2 .. ";----------]",
+            "label[" .. perplayer_formspec.form_header_x + 5.15 .. "," ..
+            perplayer_formspec.form_header_y + 4.4 .. ";Mempool]",
+            "label[" .. perplayer_formspec.form_header_x + 5.15 .. "," ..
+            perplayer_formspec.form_header_y + 4.8 .. ";Pending Tx: " .. #testcoin.mempool .. "]",]]
+
         }
             --[[
             {
@@ -103,6 +137,7 @@ ui.register_page("testcoin_main", {
 })
 
 ui.register_page("testcoin_convert", {
+    register_coin_rates();
     get_formspec = function(player, perplayer_formspec)
         local player_name = player:get_player_name()
         local sel = selected_coin[player_name]
@@ -129,22 +164,22 @@ ui.register_page("testcoin_convert", {
             "image_button[" ..
             perplayer_formspec.form_header_x + 8.6 .. "," .. perplayer_formspec.form_header_y + 0.75 .. 
             ";0.6,0.6;testcoin_send.png;coin_send;;true;".. tostring(sel == "send") ..";]",
-            -- seconds row coins
+            -- seconds row coins            
             "image_button[" ..
-            perplayer_formspec.form_header_x + 5.4 ..
-            "," .. perplayer_formspec.form_header_y + 1.5 .. ";0.6,0.6;testcoin_coin.png;coin_6;]",
+            perplayer_formspec.form_header_x + 5.4 .. "," .. perplayer_formspec.form_header_y + 1.5 .. 
+            ";0.6,0.6;testcoin_coin.png;coin_8;]",
             "image_button[" ..
-            perplayer_formspec.form_header_x + 6.2 ..
-            "," .. perplayer_formspec.form_header_y + 1.5 .. ";0.6,0.6;testcoin_coin.png;coin_7;]",
+            perplayer_formspec.form_header_x + 6.2 .. "," .. perplayer_formspec.form_header_y + 1.5 .. 
+            ";0.6,0.6;testcoin_pep2.png;coin_pep;;true;".. tostring(sel == "pep") ..";]",
             "image_button[" ..
-            perplayer_formspec.form_header_x + 7.0 ..
-            "," .. perplayer_formspec.form_header_y + 1.5 .. ";0.6,0.6;testcoin_coin.png;coin_8;]",
+            perplayer_formspec.form_header_x + 7.0 .. "," .. perplayer_formspec.form_header_y + 1.5 .. 
+            ";0.6,0.6;testcoin_coin.png;coin_9;]",
             "image_button[" ..
-            perplayer_formspec.form_header_x + 7.8 ..
-            "," .. perplayer_formspec.form_header_y + 1.5 .. ";0.6,0.6;testcoin_coin.png;coin_9;]",
+            perplayer_formspec.form_header_x + 7.8 .. "," .. perplayer_formspec.form_header_y + 1.5 .. 
+            ";0.6,0.6;testcoin_pivx1.png;coin_pivx;;true;".. tostring(sel == "pivx") ..";]",
             "image_button[" ..
-            perplayer_formspec.form_header_x + 8.6 ..
-            "," .. perplayer_formspec.form_header_y + 1.5 .. ";0.6,0.6;testcoin_coin.png;coin_10;]",
+            perplayer_formspec.form_header_x + 8.6 .. "," .. perplayer_formspec.form_header_y + 1.5 .. 
+            ";0.6,0.6;testcoin_coin.png;coin_10;]",
             -- fields
             "field[" .. perplayer_formspec.form_header_x + 5.15 .. "," ..
             perplayer_formspec.form_header_y + 2.5 .. ";4.3,0.6;input_amount;TestCoin Amount:;]",
@@ -154,11 +189,13 @@ ui.register_page("testcoin_convert", {
             "button[" ..
             perplayer_formspec.form_header_x + 5.15 ..
             "," .. perplayer_formspec.form_header_y + 4.2 .. ";4.3,0.8;submit_convert;Submit]",
-            "tooltip[coin_scc;1 TestCoin per 0.000096 SCC;]",
-            "tooltip[coin_mrx;1 TestCoin per 7.56 MRX;]",
-            "tooltip[coin_btc;1 TestCoin per 0.000000001 BTC;]",
-            "tooltip[coin_eth;1 TestCoin per 0.000000031 ETH;]",
-            "tooltip[coin_send;1 TestCoin per 10 SEND;]"
+            "tooltip[coin_scc;1 TestCoin per " .. coin_rate['scc'] .. " SCC;]",
+            "tooltip[coin_mrx;1 TestCoin per " .. coin_rate['mrx'] .. " MRX;]",
+            "tooltip[coin_btc;1 TestCoin per " .. coin_rate['btc'] .. " BTC;]",
+            "tooltip[coin_eth;1 TestCoin per " .. coin_rate['eth'] .. " ETH;]",
+            "tooltip[coin_send;1 TestCoin per " .. coin_rate['send'] .. " SEND;]",
+            "tooltip[coin_pep;1 TestCoin per " .. coin_rate['pep'] .. " PEP;]",
+            "tooltip[coin_pivx;1 TestCoin per " .. coin_rate['pivx'] .. " PIVX;]"
         }
 
         return { formspec = table.concat(formspec_left) .. table.concat(formspec_right) }
@@ -345,12 +382,12 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
         selected_coin[player_name] = "send"
         ui.set_inventory_formspec(player, "testcoin_convert")
         return
-    elseif fields.coin_6 then
-        selected_coin[player_name] = ""
+    elseif fields.coin_pep then
+        selected_coin[player_name] = "pep"
         ui.set_inventory_formspec(player, "testcoin_convert")
         return
-    elseif fields.coin_7 then
-        selected_coin[player_name] = ""
+    elseif fields.coin_pivx then
+        selected_coin[player_name] = "pivx"
         ui.set_inventory_formspec(player, "testcoin_convert")
         return
     elseif fields.coin_8 then
