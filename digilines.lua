@@ -13,12 +13,22 @@ testcoin.rig_digiline_effector = function(pos, node, channel, msg)
     end
 
     if msg.command == "status" then
+        local node = core.get_node(pos)
+        local name = node.name
+        local tier = "LV"
+        if name == "testcoin:mv_mining_rig" then
+            tier = "MV"
+        elseif name == "testcoin:hv_mining_rig" then
+            tier = "HV"
+        end
         local meta = core.get_meta(pos)
         digilines.receptor_send(pos, digilines.rules.default, channel, {
             command = msg.command,
+            enabled = meta:get_int("enabled"),
             hashrate = meta:get_int("hashrate"),
-            demand = meta:get_int("LV_EU_demand"),
-            enable = meta:get_int("enabled")
+            energy = meta:get_int(tier .. "_EU_demand"),
+            efficiency = meta:get_int("efficiency"),
+            temperature = meta:get_int("temp")
         })
     end
 
