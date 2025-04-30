@@ -43,7 +43,7 @@ local function get_active_miner(round)
     local t_miners = miner_count(testcoin.miners_active);
     -- total hashrate of miners
     local total_hashrate = testcoin.calc_hashrate_total()
-    if total_hashrate <= 0 then
+    if t_miners == 0 or total_hashrate <= 0 then
         return t_miners, nil
     end
     -- calculate hash target threshold
