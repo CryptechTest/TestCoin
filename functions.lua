@@ -47,7 +47,7 @@ local function get_active_miner(round, total_hashrate)
     -- calculate hash target threshold
     local seed = math.floor(math.random() * 1000000) % 4294967296
     local rng = PcgRandom(seed)
-    local target = rng:next(0, (total_hashrate * 2) / t_miners)
+    local target = rng:next(0, (total_hashrate * 3) / t_miners)
     -- shuffle the active miners...
     local _miners = testcoin.miners_active --shuffle(testcoin.miners_active, rng)
     -- iterate over active miners
