@@ -12,9 +12,9 @@ local function ShuffleInPlace(t)
     end
 end
 
-local function shuffle(tbl, rng)
+local function shuffle(tbl)
     for i = #tbl, 2, -1 do
-      local j = rng:next(i)
+      local j = math.random(i)
       tbl[i], tbl[j] = tbl[j], tbl[i]
     end
     return tbl
