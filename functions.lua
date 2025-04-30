@@ -75,6 +75,7 @@ local function get_miner()
     local miner = nil
     -- total hashrate of miners
     local total_hashrate = testcoin.calc_hashrate_total()
+    ShuffleInPlace(testcoin.miners_active)
     for i = 0, 7 do
         t_miners, miner = get_active_miner(i, total_hashrate)
         if t_miners == 0 or miner ~= nil then
