@@ -333,11 +333,9 @@ local function register_mining_rig(data)
 
         while true do
             if (not enabled) then
-                if meta:get_int("src_time") > round(time_scl * 10) - time_scl then
-                    local pos_str = pos.x .. "," .. pos.y .. "," .. pos.z
-                    if testcoin.miners_active[pos_str] ~= nil then
-                        testcoin.miners_active[pos_str] = nil
-                    end
+                local pos_str = pos.x .. "," .. pos.y .. "," .. pos.z
+                if testcoin.miners_active[pos_str] ~= nil then
+                    testcoin.miners_active[pos_str] = nil
                 end
                 meta:set_int("temp_over", 3)
                 meta:set_int("hashrate", 0)
@@ -358,12 +356,10 @@ local function register_mining_rig(data)
             if (not powered and not running) or miners.total == 0 then
                 -- meta:set_int(tier .. "_EU_demand", machine_demand_idle)
                 local pos_str = pos.x .. "," .. pos.y .. "," .. pos.z
-                if meta:get_int("src_time") > round(time_scl * 10) - time_scl then
-                    if testcoin.miners_active[pos_str] ~= nil then
-                        testcoin.miners_active[pos_str] = nil
-                    end
-                    meta:set_int("temp_over", 1)
+                if testcoin.miners_active[pos_str] ~= nil then
+                    testcoin.miners_active[pos_str] = nil
                 end
+                meta:set_int("temp_over", 1)
                 if temp >= 55 then
                     n_hasher.heat.do_near_heat(pos)
                 end
@@ -380,14 +376,18 @@ local function register_mining_rig(data)
             -- meta:set_string("infotext", S("%s Active"):format(machine_desc_tier))
             if meta:get_int("src_time") < round(time_scl * 10) then
                 local item_percent = math.floor(meta:get_int("src_time") / round(time_scl * 10)) * 100
-                if not powered and not running then
+                if not running then
+                    meta:set_string("infotext", S("%s Powered"):format(machine_desc_tier))
+                    --meta:set_string("formspec", get_formspec(pos, data))
+                    --meta:set_int("temp_over", 2)
+                    --meta:set_int("hashrate", 0)
+                elseif not powered and not running then
                     -- technic.swap_node(pos, machine_node)
                     meta:set_string("infotext", S("%s Unpowered"):format(machine_desc_tier))
-                    meta:set_string("formspec", get_formspec(pos, data))
+                    --meta:set_string("formspec", get_formspec(pos, data))
                     meta:set_int("temp_over", 3)
                     meta:set_int("hashrate", 0)
                     -- meta:set_int(tier .. "_EU_demand", 0)
-                    return
                 end
                 meta:set_string("formspec", get_formspec(pos, data))
                 return
