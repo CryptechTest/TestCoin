@@ -27,11 +27,11 @@ local function miner_count(T)
 end
 
 -- gets random active miner
-local function get_active_miner(round, total_hashrate, target, rng)
+local function get_active_miner(round, total_hashrate, target)
     -- performs loop using input rate count as tries,
     -- returns true if random value equals 0 on find check
-    local function find_winner(rng, rate, target, bias)
-        local r = rng:next(0, rate + bias)
+    local function find_winner(rate, target, bias)
+        local r = math.random(0, rate + bias)
         --core.log("target= " .. target .. "  result= " .. r .. "  round= " .. round)
         if r >= target then
             core.log("target= " .. target .. "  result= " .. r .. "  round= " .. round .. "  WINNER!")
@@ -53,11 +53,11 @@ local function get_active_miner(round, total_hashrate, target, rng)
             -- calculate effective hashrate
             local pow_rate, asic_rate = testcoin.calc_hashrate(miner)
             -- check pow miners
-            if find_winner(rng, pow_rate, target, 1) then
+            if find_winner(pow_rate, target, 1) then
                 return t_miners, miner
             end
             -- check asic miners
-            if find_winner(rng, asic_rate, target, 0) then
+            if find_winner(asic_rate, target, 0) then
                 return t_miners, miner
             end
         end
@@ -67,7 +67,7 @@ end
 
 -- get random miner
 local function get_miner()
-    local t_miners = 0
+    local t_miners = miner_count(testcoin.miners_active);
     local miner = nil
     -- total hashrate of miners
     local total_hashrate = testcoin.calc_hashrate_total()
@@ -77,7 +77,7 @@ local function get_miner()
     local target = rng:next(0, (total_hashrate * 2) / (t_miners * 0.5))
     ShuffleInPlace(testcoin.miners_active)
     for i = 0, 7 do
-        t_miners, miner = get_active_miner(i, total_hashrate, target, rng)
+        t_miners, miner = get_active_miner(i, total_hashrate, target)
         if t_miners == 0 or miner ~= nil then
             break
         end
