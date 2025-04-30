@@ -73,11 +73,11 @@ local function get_miner()
     -- calculate hash target threshold
     local seed = math.floor(math.random() * 1000000) % 4294967296
     local rng = PcgRandom(seed)
-    local target = rng:next(0, (total_hashrate * 2) / math.min(2, t_miners * 0.5))
     ShuffleInPlace(testcoin.miners_active)
     for i = 0, 7 do
-        t_miners, miner = get_active_miner(i, total_hashrate, target)
-        if t_miners == 0 or miner ~= nil then
+        local target = rng:next(0, (total_hashrate * 2) / math.min(2, t_miners * 0.5))
+        miner = get_active_miner(i, total_hashrate, target)
+        if miner ~= nil then
             break
         end
     end
