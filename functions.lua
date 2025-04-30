@@ -39,11 +39,6 @@ local function get_active_miner(round, total_hashrate, target)
         end
         return false
     end
-    -- total miner rigs active
-    local t_miners = miner_count(testcoin.miners_active);
-    if t_miners == 0 or total_hashrate <= 0 then
-        return t_miners, nil
-    end
     -- shuffle the active miners...
     local _miners = testcoin.miners_active --shuffle(testcoin.miners_active, rng)
     -- iterate over active miners
@@ -54,27 +49,31 @@ local function get_active_miner(round, total_hashrate, target)
             local pow_rate, asic_rate = testcoin.calc_hashrate(miner)
             -- check pow miners
             if find_winner(pow_rate, target, 1) then
-                return t_miners, miner
+                return miner
             end
             -- check asic miners
             if find_winner(asic_rate, target, 0) then
-                return t_miners, miner
+                return miner
             end
         end
     end
-    return t_miners, nil
+    return nil
 end
 
 -- get random miner
 local function get_miner()
+    -- total miner rigs active
     local t_miners = miner_count(testcoin.miners_active);
+    if t_miners == 0 then
+        return t_miners, 0, nil
+    end
     local miner = nil
     -- total hashrate of miners
     local total_hashrate = testcoin.calc_hashrate_total()
     -- calculate hash target threshold
     local seed = math.floor(math.random() * 1000000) % 4294967296
     local rng = PcgRandom(seed)
-    local target = rng:next(0, (total_hashrate * 2) / (t_miners * 0.5))
+    local target = rng:next(0, (total_hashrate * 2) / math.min(2, t_miners * 0.5))
     ShuffleInPlace(testcoin.miners_active)
     for i = 0, 7 do
         t_miners, miner = get_active_miner(i, total_hashrate, target)
