@@ -30,10 +30,11 @@ end
 local function get_active_miner(round)
     -- performs loop using input rate count as tries,
     -- returns true if random value equals 0 on find check
-    local function find_winner(rate, target, bias)
-        local r = math.random(0, rate + bias)
+    local function find_winner(rng, rate, target, bias)
+        local r = rng:next(0, 2 * rate + bias)
+        --core.log("target= " .. target .. "  result= " .. r .. "  round= " .. round)
         if r >= target then
-            core.log("target= " .. target .. "  result= " .. r .. "  round= " .. round)
+            core.log("target= " .. target .. "  result= " .. r .. "  round= " .. round .. "  WINNER!")
             return true
         end
         return false
@@ -42,10 +43,13 @@ local function get_active_miner(round)
     local t_miners = miner_count(testcoin.miners_active);
     -- total hashrate of miners
     local total_hashrate = testcoin.calc_hashrate_total()
+    if total_hashrate <= 0 then
+        return t_miners, nil
+    end
     -- calculate hash target threshold
     local seed = math.floor(math.random() * 1000000) % 4294967296
     local rng = PcgRandom(seed)
-    local target = rng:next(0, total_hashrate - 1)
+    local target = rng:next(0, (total_hashrate * 2.5) / t_miners)
     -- shuffle the active miners...
     local _miners = shuffle(testcoin.miners_active, rng)
     -- iterate over active miners
@@ -55,11 +59,11 @@ local function get_active_miner(round)
             -- calculate effective hashrate
             local pow_rate, asic_rate = testcoin.calc_hashrate(miner)
             -- check pow miners
-            if find_winner(pow_rate, target, 1) then
+            if find_winner(rng, pow_rate, target, 1) then
                 return t_miners, miner
             end
             -- check asic miners
-            if find_winner(asic_rate, target, 0) then
+            if find_winner(rng, asic_rate, target, 0) then
                 return t_miners, miner
             end
         end
@@ -71,7 +75,7 @@ end
 local function get_miner()
     local t = 0
     local miner = nil
-    for i = 0, 3 do
+    for i = 0, 7 do
         t, miner = get_active_miner(i)
         if t == 0 or miner ~= nil then
             break
