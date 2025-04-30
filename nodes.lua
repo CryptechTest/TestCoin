@@ -317,7 +317,7 @@ local function register_mining_rig(data)
             }
             testcoin.calc_hashrate(miner)
             testcoin.miners_active[pos_str] = miner
-            if miners.asic_miner > 1 or miners.pow_miner > 0 or miners.total > 0 then
+            if miners.total > 0 then
                 n_hasher.heat.apply_miner_heat(pos, miner, has_vac, has_air)
             end
             if temp >= 50 then

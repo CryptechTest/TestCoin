@@ -27,11 +27,11 @@ local function miner_count(T)
 end
 
 -- gets random active miner
-local function get_active_miner(round)
+local function get_active_miner(round, total_hashrate)
     -- performs loop using input rate count as tries,
     -- returns true if random value equals 0 on find check
     local function find_winner(rng, rate, target, bias)
-        local r = rng:next(0, 2 * rate + bias)
+        local r = rng:next(0, rate + bias)
         --core.log("target= " .. target .. "  result= " .. r .. "  round= " .. round)
         if r >= target then
             core.log("target= " .. target .. "  result= " .. r .. "  round= " .. round .. "  WINNER!")
@@ -41,15 +41,13 @@ local function get_active_miner(round)
     end
     -- total miner rigs active
     local t_miners = miner_count(testcoin.miners_active);
-    -- total hashrate of miners
-    local total_hashrate = testcoin.calc_hashrate_total()
     if t_miners == 0 or total_hashrate <= 0 then
         return t_miners, nil
     end
     -- calculate hash target threshold
     local seed = math.floor(math.random() * 1000000) % 4294967296
     local rng = PcgRandom(seed)
-    local target = rng:next(0, (total_hashrate * 2.5) / t_miners)
+    local target = rng:next(0, (total_hashrate * 2) / t_miners)
     -- shuffle the active miners...
     local _miners = shuffle(testcoin.miners_active, rng)
     -- iterate over active miners
@@ -73,15 +71,17 @@ end
 
 -- get random miner
 local function get_miner()
-    local t = 0
+    local t_miners = 0
     local miner = nil
+    -- total hashrate of miners
+    local total_hashrate = testcoin.calc_hashrate_total()
     for i = 0, 7 do
-        t, miner = get_active_miner(i)
-        if t == 0 or miner ~= nil then
+        t_miners, miner = get_active_miner(i, total_hashrate)
+        if t_miners == 0 or miner ~= nil then
             break
         end
     end
-    return t, miner
+    return t_miners, total_hashrate, miner
 end
 
 -- get random staker
@@ -232,7 +232,7 @@ end
 
 -- try and mine a testcoin block
 local mine_block = function(data)
-    local miner_count, miner = get_miner()
+    local miner_count, hashrate, miner = get_miner()
     if miner == nil then
         if miner_count == 0 then
             core.log("TestCoin: No active miners")
@@ -250,7 +250,7 @@ local mine_block = function(data)
         core.log("TestCoin: No active stakers")
     end
     
-    core.log("TestCoin: Miner found block!")
+    core.log("TestCoin: Miner found block!  Total Hashrate: " .. hashrate)
     create_block(miner, staker, data)
 end
 
@@ -269,10 +269,10 @@ function testcoin.calc_hashrate(miner)
     end
     local pow_miners = miner.miners.pow_miner or 0
     local asic_miners = miner.miners.asic_miner or 0
-    local pow_rate = pow_miners * 1 * t;
-    local asic_rate = asic_miners * 2 * t;
+    local pow_rate = (10 * pow_miners * 1 * t) + (math.random() * 2);
+    local asic_rate = (10 * asic_miners * 2 * t) + (math.random() * 2);
     if miner.miners.total > 0 then
-        miner.rate = (10 * (pow_rate + asic_rate)) + (math.random() * 2)
+        miner.rate = pow_rate + asic_rate
         local meta = core.get_meta(miner.pos)
         meta:set_int("hashrate", miner.rate);
     end
