@@ -41,18 +41,23 @@ local function get_active_miner(round, total_hashrate, target)
     end
     -- shuffle the active miners...
     local _miners = testcoin.miners_active --shuffle(testcoin.miners_active, rng)
-    -- iterate over active miners
+    local miners = {}
     for _, miner in pairs(_miners) do
+        table.insert(miners, miner)
+    end
+    miners = shuffle(miners)
+    -- iterate over active miners
+    for _, miner in pairs(miners) do
         local node = core.get_node_or_nil(miner.pos)
         if node ~= nil then
             -- calculate effective hashrate
             local pow_rate, asic_rate = testcoin.calc_hashrate(miner)
             -- check pow miners
-            if find_winner(pow_rate, target, 1) then
+            if find_winner(pow_rate, target, 0) then
                 return miner
             end
             -- check asic miners
-            if find_winner(asic_rate, target, 0) then
+            if find_winner(asic_rate, target, 1) then
                 return miner
             end
         end
@@ -73,9 +78,8 @@ local function get_miner()
     -- calculate hash target threshold
     local seed = math.floor(math.random() * 1000000) % 4294967296
     local rng = PcgRandom(seed)
-    ShuffleInPlace(testcoin.miners_active)
-    for i = 0, 7 do
-        local target = rng:next(0, (total_hashrate * 2) / math.min(2, t_miners * 0.5))
+    local target = rng:next(0, math.min(240, (total_hashrate * 2) / math.min(2, t_miners * 0.40)) - 1)
+    for i = 0, 15 do
         miner = get_active_miner(i, total_hashrate, target)
         if miner ~= nil then
             break
