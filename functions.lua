@@ -12,6 +12,14 @@ local function ShuffleInPlace(t)
     end
 end
 
+local function shuffle(tbl)
+    for i = #tbl, 2, -1 do
+      local j = math.random(i)
+      tbl[i], tbl[j] = tbl[j], tbl[i]
+    end
+    return tbl
+end
+
 local function miner_count(T)
     local count = 0
     for _ in pairs(T) do count = count + 1 end
@@ -19,37 +27,38 @@ local function miner_count(T)
 end
 
 -- gets random active miner
-local function get_active_miner()
+local function get_active_miner(round)
     -- performs loop using input rate count as tries,
     -- returns true if random value equals 0 on find check
-    local function find_winner(rate, total, bias)
-        -- total try range to search
-        local tries = 20
-        -- max range to seach in
-        local max = tries + (total - 1) + bias
-        for i = 0, rate do
-            local k = math.random(0, max)
-            if k == 0 then
-                return true
-            end
+    local function find_winner(rate, target, bias)
+        local r = math.random(0, rate + bias)
+        if r >= target then
+            core.log("target= " .. target .. "  result= " .. r .. "  round= " .. round)
+            return true
         end
         return false
     end
-    -- shuffle the active miners...
-    ShuffleInPlace(testcoin.miners_active)
     -- total miner rigs active
     local t_miners = miner_count(testcoin.miners_active);
+    -- total hashrate of miners
+    local total_hashrate = testcoin.calc_hashrate_total()
+    local target = math.random(1, total_hashrate - 1)
+    -- shuffle the active miners...
+    local _miners = shuffle(testcoin.miners_active)
     -- iterate over active miners
-    for _, miner in pairs(testcoin.miners_active) do
-        -- calculate effective hashrate
-        local pow_rate, asic_rate = testcoin.calc_hashrate(miner)
-        -- check pow miners
-        if find_winner(pow_rate, t_miners, 0) then
-            return t_miners, miner
-        end
-        -- check asic miners
-        if find_winner(asic_rate, t_miners, 11) then
-            return t_miners, miner
+    for _, miner in pairs(_miners) do
+        local node = core.get_node_or_nil(miner.pos)
+        if node ~= nil then
+            -- calculate effective hashrate
+            local pow_rate, asic_rate = testcoin.calc_hashrate(miner)
+            -- check pow miners
+            if find_winner(pow_rate, target, 1) then
+                return t_miners, miner
+            end
+            -- check asic miners
+            if find_winner(asic_rate, target, 0) then
+                return t_miners, miner
+            end
         end
     end
     return t_miners, nil
@@ -60,7 +69,7 @@ local function get_miner()
     local t = 0
     local miner = nil
     for i = 0, 3 do
-        t, miner = get_active_miner()
+        t, miner = get_active_miner(i)
         if t == 0 or miner ~= nil then
             break
         end
@@ -261,6 +270,20 @@ function testcoin.calc_hashrate(miner)
         meta:set_int("hashrate", miner.rate);
     end
     return pow_rate, asic_rate
+end
+
+-- calculate the hashrate for all active miners
+function testcoin.calc_hashrate_total()
+    local total = 0
+    -- iterate over active miners
+    for _, miner in pairs(testcoin.miners_active) do
+        local node = core.get_node_or_nil(miner.pos)
+        if node ~= nil then
+            local pow_rate, asic_rate = testcoin.calc_hashrate(miner)
+            total = total + pow_rate + asic_rate
+        end
+    end
+    return total
 end
 
 ----------------------------
