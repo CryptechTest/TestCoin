@@ -305,11 +305,11 @@ local function spawn_particle(pos, dir_x, dir_y, dir_z, acl_x, acl_y, acl_z, siz
         cols = true
     }
 
-    local rx = dir_x * prt.vel * -math.random(0.3 * 100, 0.7 * 100) / 100
-    local ry = dir_y * prt.vel * -math.random(0.3 * 100, 0.7 * 100) / 100
-    local rz = dir_z * prt.vel * -math.random(0.3 * 100, 0.7 * 100) / 100
+    local rx = dir_x * prt.vel * (-math.random(0.3 * 100, 0.7 * 100) / 100)
+    local ry = dir_y * prt.vel * (-math.random(0.3 * 100, 0.7 * 100) / 100)
+    local rz = dir_z * prt.vel * (-math.random(0.3 * 100, 0.7 * 100) / 100)
     minetest.add_particlespawner({
-        amount = amount,
+        amount = amount + 2,
         -- pos = pos,
         minpos = {
             x = pos.x + -0.35,
@@ -375,19 +375,19 @@ local function particle_effect(pos, c, tier)
     local zdir = 0;
     if param2 == 0 then
         dir = 2
-        zdir = 1.5
+        zdir = 1.0
     elseif param2 == 1 then
         dir = 3
-        xdir = 1.5
+        xdir = 1.0
     elseif param2 == 2 then
         dir = 0
-        zdir = -1.5
+        zdir = -1.0
     elseif param2 == 3 then
         dir = 1
-        xdir = -1.5
+        xdir = -1.0
     end
     spawn_particle(pos, xdir * 1, math.random(-0.02, 0.005), zdir * 1, math.random(0.02, 0.1) * xdir, 0.2,
-                   math.random(0.02, 0.1) * zdir, 0.25, 2, 5 * c, tier)
+                   math.random(0.02, 0.1) * zdir, 0.25, 2, 3 * c, tier)
 end
 
 -------------------------------------------------------
