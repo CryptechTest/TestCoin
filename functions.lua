@@ -12,9 +12,9 @@ local function ShuffleInPlace(t)
     end
 end
 
-local function shuffle(tbl)
+local function shuffle(tbl, rng)
     for i = #tbl, 2, -1 do
-      local j = math.random(i)
+      local j = rng:next(i)
       tbl[i], tbl[j] = tbl[j], tbl[i]
     end
     return tbl
@@ -42,9 +42,12 @@ local function get_active_miner(round)
     local t_miners = miner_count(testcoin.miners_active);
     -- total hashrate of miners
     local total_hashrate = testcoin.calc_hashrate_total()
-    local target = math.random(1, total_hashrate - 1)
+    -- calculate hash target threshold
+    local seed = math.floor(math.random() * 1000000) % 4294967296
+    local rng = PcgRandom(seed)
+    local target = rng:next(0, total_hashrate - 1)
     -- shuffle the active miners...
-    local _miners = shuffle(testcoin.miners_active)
+    local _miners = shuffle(testcoin.miners_active, rng)
     -- iterate over active miners
     for _, miner in pairs(_miners) do
         local node = core.get_node_or_nil(miner.pos)
