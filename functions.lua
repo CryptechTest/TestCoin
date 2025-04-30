@@ -49,7 +49,7 @@ local function get_active_miner(round, total_hashrate)
     local rng = PcgRandom(seed)
     local target = rng:next(0, (total_hashrate * 2) / t_miners)
     -- shuffle the active miners...
-    local _miners = shuffle(testcoin.miners_active, rng)
+    local _miners = testcoin.miners_active --shuffle(testcoin.miners_active, rng)
     -- iterate over active miners
     for _, miner in pairs(_miners) do
         local node = core.get_node_or_nil(miner.pos)
