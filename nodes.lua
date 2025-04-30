@@ -297,6 +297,7 @@ local function register_mining_rig(data)
                 -- change to damage hashing card due to high heat
                 n_hasher.damage_miner_hasher(pos, miners, temp)
             else
+                n_hasher.particle_effect(pos, miners.total, tier)
                 local olt = miners.total
                 local eff = ((miners.asic_miner + miners.pow_miner) / olt) * 100
                 meta:set_int("efficiency", eff)

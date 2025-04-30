@@ -274,6 +274,122 @@ local function damage_miner_hasher(pos, miners, temp)
     end
 end
 
+local function spawn_particle(pos, dir_x, dir_y, dir_z, acl_x, acl_y, acl_z, size, time, amount, tier)
+    local t_name = "testcoin_miner_effect_1.png"
+    if tier == "MV" then
+        t_name = "testcoin_miner_effect_2.png"
+    elseif tier == "HV" then
+        t_name = "testcoin_miner_effect_3.png"
+    end
+    local texture = {
+        name = t_name,
+        blend = "alpha",
+        scale = 1.5,
+        alpha = 1.0,
+        alpha_tween = {1, 1, 0.5, 0.01},
+        scale_tween = {{
+            x = 1.75,
+            y = 1.75
+        }, {
+            x = 0.1,
+            y = 0.1
+        }}
+    }
+
+    local prt = {
+        texture = texture,
+        vel = 1,
+        time = (time or 6),
+        size = (size or 1),
+        glow = math.random(6, 10),
+        cols = true
+    }
+
+    local rx = dir_x * prt.vel * -math.random(0.3 * 100, 0.7 * 100) / 100
+    local ry = dir_y * prt.vel * -math.random(0.3 * 100, 0.7 * 100) / 100
+    local rz = dir_z * prt.vel * -math.random(0.3 * 100, 0.7 * 100) / 100
+    minetest.add_particlespawner({
+        amount = amount,
+        -- pos = pos,
+        minpos = {
+            x = pos.x + -0.35,
+            y = pos.y + -0.35,
+            z = pos.z + -0.35
+        },
+        maxpos = {
+            x = pos.x + 0.35,
+            y = pos.y + 0.35,
+            z = pos.z + 0.35
+        },
+        minvel = {
+            x = rx * 0.25,
+            y = ry * 0.25,
+            z = rz * 0.25
+        },
+        maxvel = {
+            x = rx,
+            y = ry,
+            z = rz
+        },
+        minacc = {
+            x = acl_x * 0.5,
+            y = acl_y * 0.5,
+            z = acl_z * 0.5
+        },
+        maxacc = {
+            x = acl_x * 2,
+            y = acl_y * 2,
+            z = acl_z * 2
+        },
+        time = prt.time + 2,
+        minexptime = prt.time - math.random(0, 1),
+        maxexptime = prt.time * 2,
+        minsize = ((math.random(0.37, 0.63)) * 2 + 1.6) * prt.size,
+        maxsize = ((math.random(0.77, 0.93)) * 2 + 1.6) * prt.size,
+        collisiondetection = prt.cols,
+        vertical = false,
+        texture = texture,
+        -- animation = animation,
+        glow = prt.glow
+    })
+end
+
+local is_player_near = function(pos)
+    local objs = core.get_objects_inside_radius(pos, 16)
+    for _, obj in pairs(objs) do
+        if obj:is_player() then
+            return true;
+        end
+    end
+    return false;
+end
+
+local function particle_effect(pos, c, tier)
+    if not is_player_near(pos) then
+        return
+    end
+    local node = minetest.get_node(pos)
+    local param2 = node.param2
+    local dir = param2;
+    local xdir = 0;
+    local zdir = 0;
+    if param2 == 0 then
+        dir = 2
+        zdir = 1.5
+    elseif param2 == 1 then
+        dir = 3
+        xdir = 1.5
+    elseif param2 == 2 then
+        dir = 0
+        zdir = -1.5
+    elseif param2 == 3 then
+        dir = 1
+        xdir = -1.5
+    end
+    spawn_particle(pos, xdir * 1, math.random(-0.02, 0.005), zdir * 1, math.random(0.02, 0.1) * xdir, 0.2,
+                   math.random(0.02, 0.1) * zdir, 0.25, 2, 5 * c, tier)
+end
+
 -------------------------------------------------------
 -- Export
 
@@ -284,5 +400,6 @@ hasher.is_upgrade_part = is_upgrade_part
 hasher.spend_upgrade = spend_upgrade
 hasher.apply_upgrades = apply_upgrades
 hasher.damage_miner_hasher = damage_miner_hasher
+hasher.particle_effect = particle_effect
 
 return hasher
