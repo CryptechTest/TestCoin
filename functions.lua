@@ -75,10 +75,13 @@ local function get_miner()
     local miner = nil
     -- total hashrate of miners
     local total_hashrate = testcoin.calc_hashrate_total()
+    if total_hashrate <= 0 then
+        return t_miners, 0, miner
+    end
     -- calculate hash target threshold
     local seed = math.floor(math.random() * 1000000) % 4294967296
     local rng = PcgRandom(seed)
-    local target = rng:next(0, math.min(240, (total_hashrate * 2) / math.min(2, t_miners * 0.40)) - 1)
+    local target = rng:next(0, math.max(1, math.min(240, (total_hashrate * 2) / math.min(2, t_miners * 0.40))) - 1)
     for i = 0, 15 do
         miner = get_active_miner(i, total_hashrate, target)
         if miner ~= nil then
