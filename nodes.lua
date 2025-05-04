@@ -50,6 +50,7 @@ local function register_mining_rig(data)
     local function get_formspec(pos, data)
         local meta = core.get_meta(pos)
         local def_chan = meta:get_string("digilines_channel")
+        local edit_mode = meta:get_int("edit_mode")
         local hashrate = meta:get_string("hashrate") or 0
         local enabled = meta:get_int("enabled") == 1
         local heat = meta:get_int("temp") or -3
@@ -135,10 +136,18 @@ local function register_mining_rig(data)
         else
             _hashrate = core.colorize('#0afc8f', _hashrate)
         end
+        if edit_mode == 1 then
+            _hashrate = core.colorize('#7a7a7a', _hashrate)
+        end
 
         local _en_demand = core.colorize('#5a85db', en_demand);
         if en_demand > 0 then
             _en_demand = core.colorize('#05a9f5', en_demand);
+        end
+
+        local save = ""
+        if edit_mode == 1 then
+            save = "button[6.0,2.45;1.0,0.25;save;Save]"
         end
 
         return "size[8,8]" .. default.gui_bg .. default.gui_bg_img .. default.gui_slots ..
@@ -147,9 +156,10 @@ local function register_mining_rig(data)
                    "list[current_player;main;0,5.15;8,3;8]" .. "listring[context;main]" .. "listring[context;module]" ..
                    "listring[context;reward]" .. "listring[current_player;main]" .. "label[0.25,-0.15;Miners]" ..
                    "label[3.25,-0.15;Hashes]" .. "label[3.25,0.185;" .. _hashrate .. "]" .. "label[0.25,2.2;Upgrades]" ..
-                   "button[3.25,0.7;1.5,0.8;on;" .. on_btn .. "]" .. "label[4.75,-0.15;Rewards]" ..
-                   "button[3.25,1.4;1.5,0.8;off;" .. off_btn .. "]" .. "field[5.05,3.0;3,1;channel;Channel;" .. def_chan ..
-                   "]" .. "label[3.25,3.1;Te= " .. _heat .. "]" .. "label[3.25,2.3;Eu= " .. _en_demand .. "]" ..
+                   "button[3.25,0.7;1.5,0.8;on;" .. on_btn .. "]" .. "button[3.25,1.4;1.5,0.8;off;" .. off_btn .. "]" ..
+                   "label[4.75,-0.15;Rewards]" .. "field[5.05,3.1;3,1;channel;Channel;" .. def_chan .. "]" ..
+                   "button[6.76,2.45;1.0,0.25;edit;Edit]" .. save ..
+                   "label[3.25,3.1;Te= " .. _heat .. "]" .. "label[3.25,2.3;Eu= " .. _en_demand .. "]" ..
                    "label[3.25,2.7;Eff= " .. _eff .. "]"
 
     end
@@ -238,6 +248,9 @@ local function register_mining_rig(data)
             meta:set_int(tier .. "_EU_input", 0)
             return
         end
+        if meta:get_int("edit_mode") == nil then
+            meta:set_string("edit_mode", 0)
+        end
 
         -- get upgrades, apply and get power reduction
         local upgrades = n_hasher.get_upgrades(pos)
@@ -275,7 +288,9 @@ local function register_mining_rig(data)
             end
             meta:set_int("temp_over", 3)
             -- meta:set_int("src_time", 0)
-            meta:set_string("formspec", get_formspec(pos, data))
+            if meta:get_int("edit_mode") == 0 then
+                meta:set_string("formspec", get_formspec(pos, data))
+            end
             return
         end
 
@@ -297,6 +312,9 @@ local function register_mining_rig(data)
                 -- change to damage hashing card due to high heat
                 n_hasher.damage_miner_hasher(pos, miners, temp)
             else
+                if temp >= 65 then
+                    n_hasher.damage_miner_hasher(pos, miners, temp)
+                end
                 n_hasher.particle_effect(pos, miners.total, tier)
                 local olt = miners.total
                 local eff = ((miners.asic_miner + miners.pow_miner) / olt) * 100
@@ -311,6 +329,7 @@ local function register_mining_rig(data)
                 hash_id = hash_id,
                 pos = pos,
                 miners = miners,
+                upgrades = upgrades,
                 tier = tier,
                 rate = 0,
                 temp = temp
@@ -343,7 +362,9 @@ local function register_mining_rig(data)
                 meta:set_string("infotext", S("%s Disabled"):format(machine_desc_tier))
                 meta:set_int(tier .. "_EU_demand", 0)
                 meta:set_int("src_time", 0)
-                meta:set_string("formspec", get_formspec(pos, data))
+                if meta:get_int("edit_mode") == 0 then
+                    meta:set_string("formspec", get_formspec(pos, data))
+                end
                 return
             end
 
@@ -378,18 +399,20 @@ local function register_mining_rig(data)
                 local item_percent = math.floor(meta:get_int("src_time") / round(time_scl * 10)) * 100
                 if not running then
                     meta:set_string("infotext", S("%s Powered"):format(machine_desc_tier))
-                    --meta:set_string("formspec", get_formspec(pos, data))
-                    --meta:set_int("temp_over", 2)
-                    --meta:set_int("hashrate", 0)
+                    -- meta:set_string("formspec", get_formspec(pos, data))
+                    -- meta:set_int("temp_over", 2)
+                    -- meta:set_int("hashrate", 0)
                 elseif not powered and not running then
                     -- technic.swap_node(pos, machine_node)
                     meta:set_string("infotext", S("%s Unpowered"):format(machine_desc_tier))
-                    --meta:set_string("formspec", get_formspec(pos, data))
+                    -- meta:set_string("formspec", get_formspec(pos, data))
                     meta:set_int("temp_over", 3)
                     meta:set_int("hashrate", 0)
                     -- meta:set_int(tier .. "_EU_demand", 0)
                 end
-                meta:set_string("formspec", get_formspec(pos, data))
+                if meta:get_int("edit_mode") == 0 then
+                    meta:set_string("formspec", get_formspec(pos, data))
+                end
                 return
             end
 
@@ -435,6 +458,7 @@ local function register_mining_rig(data)
             -- Initialize data
             meta:set_int("tube_time", 0)
             meta:set_int("enabled", 1)
+            meta:set_int("edit_mode", 0)
             meta:set_int("hashrate", 0)
             meta:set_int("temp", 20)
             meta:set_int("temp_over", 0)
@@ -615,11 +639,12 @@ local function register_mining_rig(data)
             return false
         end,
         on_receive_fields = function(pos, formname, fields, sender)
+            local meta = core.get_meta(pos)
             if fields.quit then
+                meta:set_int("edit_mode", 0)
                 return
             end
-            local node = core.get_node(pos)
-            local meta = core.get_meta(pos)
+            --local node = core.get_node(pos)
 
             if fields.on then
                 meta:set_int("enabled", 1)
@@ -627,8 +652,16 @@ local function register_mining_rig(data)
             if fields.off then
                 meta:set_int("enabled", 0)
             end
-            if fields.channel then
+            if fields.edit then
+                if meta:get_int("edit_mode") == 0 then
+                    meta:set_int("edit_mode", 1)
+                else
+                    meta:set_int("edit_mode", 0)
+                end
+            end
+            if fields.save and fields.channel then
                 meta:set_string("digilines_channel", fields.channel)
+                meta:set_int("edit_mode", 0)
             end
             local formspec = get_formspec(pos, data)
             meta:set_string("formspec", formspec)

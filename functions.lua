@@ -274,10 +274,19 @@ function testcoin.calc_hashrate(miner)
     elseif miner.tier == "HV" then
         t = 2
     end
+    local ctrl = 2
+    if miner.temp < 90 then
+        if miner.upgrades.control then
+            ctrl = ctrl + miner.upgrades.control
+        end
+        if miner.upgrades.control_adv then
+            t = t + (miner.upgrades.control_adv * 0.1)
+        end
+    end
     local pow_miners = miner.miners.pow_miner or 0
     local asic_miners = miner.miners.asic_miner or 0
-    local pow_rate = (10 * pow_miners * 1 * t) + (math.random() * 2);
-    local asic_rate = (10 * asic_miners * 2 * t) + (math.random() * 2);
+    local pow_rate = (10 * pow_miners * 1 * t) + (math.random() * (ctrl + 1));
+    local asic_rate = (10 * asic_miners * 2 * t) + (math.random() * ctrl);
     if miner.miners.total > 0 then
         miner.rate = pow_rate + asic_rate
         local meta = core.get_meta(miner.pos)

@@ -20,6 +20,35 @@ core.register_craftitem("testcoin:rig_part", {
     inventory_image = "testcoin_rig_part.png"
 })
 
+core.register_craftitem("testcoin:chip", {
+    description = "Mining Chip Blue",
+    stack_max = 32,
+    inventory_image = "testcoin_chip.png"
+})
+
+core.register_craftitem("testcoin:chip_green", {
+    description = "Mining Chip Green",
+    stack_max = 32,
+    inventory_image = "testcoin_chip_green.png"
+})
+
+core.register_craftitem("testcoin:chip_red", {
+    description = "Mining Chip Red",
+    stack_max = 32,
+    inventory_image = "testcoin_chip_red.png"
+})
+
+core.register_craftitem("testcoin:control_logic_unit_adv", {
+    description = "Advanced Control Logic Unit",
+    stack_max = 8,
+    inventory_image = "testcoin_control_logic_unit_adv.png",
+    wield_scale = {
+        x = 0.6,
+        y = 0.6,
+        z = 0.6
+    }
+})
+
 core.register_node("testcoin:pow_miner", {
     description = "PoW Miner",
     stack_max = 1,

@@ -86,7 +86,7 @@ local function get_power_draw(miners, tier)
         elseif miner == "pow_miner_broke" then
             total = total + (count * (miner_draw.pow - deduction.pow) * 1.08)
         elseif miner == "asic_miner_broke" then
-            total = total + (count * (miner_draw.asic - deduction.asic) * 1.08)
+            total = total + (count * (miner_draw.asic - deduction.asic) * 1.06)
         end
     end
     return (total - deduction.total) + math.random(-2, 3);
@@ -101,16 +101,19 @@ local function get_upgrades(pos)
         local name = stack:get_name()
         if name == "digistuff:heatsink" then
             local iname = 'heatsink';
-            upgrades[iname] = upgrades[iname] or 1
+            upgrades[iname] = (upgrades[iname] or 0) + 1
         elseif name == "technic:control_logic_unit" then
             local iname = 'control';
-            upgrades[iname] = upgrades[iname] or 1
+            upgrades[iname] = (upgrades[iname] or 0) + 1
+        elseif name == "testcoin:control_logic_unit_adv" then
+            local iname = 'control_adv';
+            upgrades[iname] = (upgrades[iname] or 0) + 1
         elseif name == "ship_parts:eviromental_sys" then
             local iname = 'enviroment';
-            upgrades[iname] = upgrades[iname] or 1
+            upgrades[iname] = (upgrades[iname] or 0) + 1
         elseif name == "ship_machine:bottle_of_coolant" then
             local iname = 'coolant';
-            upgrades[iname] = upgrades[iname] or 1
+            upgrades[iname] = (upgrades[iname] or 0) + 1
         end
     end
     return upgrades
@@ -121,6 +124,8 @@ local function is_upgrade_part(itemstack)
     if name == "digistuff:heatsink" then
         return true
     elseif name == "technic:control_logic_unit" then
+        return true
+    elseif name == "testcoin:control_logic_unit_adv" then
         return true
     elseif name == "ship_parts:eviromental_sys" then
         return true
@@ -173,33 +178,53 @@ end
 local function apply_upgrades(pos, upgrades, tier)
     local reduction = 0
     if upgrades.heatsink then
+        -- reduces heat
         if tier == "HV" then
-            hasher.heat.handle_temp(pos, -(2 * upgrades.heatsink), 1, 0, 5)
+            hasher.heat.handle_temp(pos, -(2 * upgrades.heatsink), 0, 0, 5)
+            reduction = reduction + 10
+        elseif tier == "MV" then
+            hasher.heat.handle_temp(pos, -(1 * upgrades.heatsink), 0, 0, 5)
+            reduction = reduction + 30
         else
             hasher.heat.handle_temp(pos, -(1 * upgrades.heatsink), 0, 0, 5)
-        end
-        reduction = reduction + 10
-        if tier == "MV" then
             reduction = reduction + 20
         end
     end
     if upgrades.control then
-        hasher.heat.handle_temp(pos, -(1 * upgrades.control), 0, 0, 5)
+        -- boosts hashrate slightly and gives power reduction
         if tier == "HV" then
             reduction = reduction + (300 * upgrades.control)
+        elseif tier == "MV" then
+            reduction = reduction + (250 * upgrades.control)
         else
             reduction = reduction + (200 * upgrades.control)
         end
     end
+    if upgrades.control_adv then
+        -- boosts hashrate, uses more power and generates more heat
+        if tier == "HV" then
+            hasher.heat.handle_temp(pos, 1, upgrades.control_adv, 0, 5)
+            reduction = reduction - (250 * upgrades.control_adv)
+        elseif tier == "MV" then
+            hasher.heat.handle_temp(pos, 1, upgrades.control_adv + 1, 0, 5)
+            reduction = reduction - (200 * upgrades.control_adv)
+        else
+            hasher.heat.handle_temp(pos, 0, upgrades.control_adv + 1, 0, 5)
+            reduction = reduction - (200 * upgrades.control_adv)
+        end
+    end
     if upgrades.enviroment then
+        -- reduces heat and does small power reduction
         if tier == "HV" then
             hasher.heat.handle_temp(pos, -(2 * upgrades.enviroment), 0, 0, 3)
+            reduction = reduction + 50
         else
             hasher.heat.handle_temp(pos, -(2 * upgrades.enviroment), 1, 0, 5)
+            reduction = reduction + 80
         end
-        reduction = reduction + 50
     end
     if upgrades.coolant then
+        -- instant reduce heat
         if spend_upgrade(pos, 'coolant') then
             reduction = reduction + 400
         end
@@ -214,23 +239,29 @@ local function damage_miner_hasher(pos, miners, temp)
     local r_a, r_b
     if temp >= 95 then
         r_a = math.random(0, 100000) -- pow
-        r_b = math.random(0, 50000) -- asic
-        over_tick = over_tick + 2
+        r_b = math.random(0, 70000) -- asic
+        over_tick = over_tick + 3
     elseif temp >= 90 then
         r_a = math.random(0, 400000) -- pow
         r_b = math.random(0, 200000) -- asic
-        over_tick = over_tick + math.random(1, 2)
+        over_tick = over_tick + math.random(2, 3)
     elseif temp >= 85 then
         r_a = math.random(0, 2000000) -- pow
         r_b = math.random(0, 1000000) -- asic
-        over_tick = over_tick + 1
+        over_tick = over_tick + 2
     elseif temp >= 80 then
         r_a = math.random(0, 50000000) -- pow
         r_b = math.random(0, 25000000) -- asic
+        over_tick = over_tick + math.random(1, 2)
+    elseif temp >= 70 then
+        r_a = math.random(0, 90000000) -- pow
+        r_b = math.random(0, 50000000) -- asic
         over_tick = over_tick + math.random(0, 1)
     else
-        over_tick = over_tick + math.random(-1, 0)
-        meta:set_int("temp_over_tick", over_tick)
+        if over_tick > 0 then
+            over_tick = over_tick + math.random(-1, 1)
+            meta:set_int("temp_over_tick", over_tick)
+        end
         return
     end
     meta:set_int("temp_over_tick", over_tick)

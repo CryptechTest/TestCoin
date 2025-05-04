@@ -22,13 +22,26 @@ testcoin.rig_digiline_effector = function(pos, node, channel, msg)
             tier = "HV"
         end
         local meta = core.get_meta(pos)
+        local inv = meta:get_inventory()
+        local balance = 0
+        if not inv:is_empty("reward") then
+            for i, stack in pairs(inv:get_list("reward")) do
+				if not stack:is_empty() then
+					local name = stack:get_name()
+                    local count = stack:get_count()
+                    balance = balance + count
+                end
+            end
+        end
         digilines.receptor_send(pos, digilines.rules.default, channel, {
             command = msg.command,
             enabled = meta:get_int("enabled"),
             hashrate = meta:get_int("hashrate"),
             energy = meta:get_int(tier .. "_EU_demand"),
             efficiency = meta:get_int("efficiency"),
-            temperature = meta:get_int("temp")
+            temperature = meta:get_int("temp"),
+            overheat = meta:get_int("temp_over_tick"),
+            balance = balance
         })
     end
 
