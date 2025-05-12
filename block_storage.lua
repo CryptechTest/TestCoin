@@ -15,8 +15,10 @@ testcoin.vtx_coinbase = {
 
 function testcoin.save_chain()
     local output = io.open(file, "w")
-    output:write(core.write_json(testcoin.blocks))
-    io.close(output);
+    if output then
+        output:write(core.write_json(testcoin.blocks))
+        io.close(output);
+    end
 end
 
 function testcoin.read_chain()
