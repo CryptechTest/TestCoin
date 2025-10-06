@@ -317,6 +317,14 @@ function testcoin.calc_hashrate_total()
     return total
 end
 
+function testcoin.remove_active_miner(pos)
+    -- remove miner
+    local pos_str = pos.x .. "," .. pos.y .. "," .. pos.z
+    if testcoin.miners_active[pos_str] ~= nil then
+        testcoin.miners_active[pos_str] = nil
+    end
+end
+
 ----------------------------
 
 -- run the blockchain
