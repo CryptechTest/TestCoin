@@ -40,7 +40,7 @@ local function get_active_miner(round, total_hashrate, target)
         return false
     end
     -- shuffle the active miners...
-    local _miners = testcoin.miners_active --shuffle(testcoin.miners_active, rng)
+    local _miners = testcoin.miners_active
     local miners = {}
     for _, miner in pairs(_miners) do
         table.insert(miners, miner)
@@ -50,15 +50,23 @@ local function get_active_miner(round, total_hashrate, target)
     for _, miner in pairs(miners) do
         local node = core.get_node_or_nil(miner.pos)
         if node ~= nil then
-            -- calculate effective hashrate
-            local pow_rate, asic_rate = testcoin.calc_hashrate(miner)
-            -- check pow miners
-            if find_winner(pow_rate, target, 0) then
-                return miner
-            end
-            -- check asic miners
-            if find_winner(asic_rate, target, 1) then
-                return miner
+            if core.get_item_group(node.name, "mining_rig") == 0 then
+                -- remove invalid miners
+                local pos_str = miner.pos.x .. "," .. miner.pos.y .. "," .. miner.pos.z
+                if testcoin.miners_active[pos_str] ~= nil then
+                    testcoin.miners_active[pos_str] = nil
+                end
+            else
+                -- calculate effective hashrate
+                local pow_rate, asic_rate = testcoin.calc_hashrate(miner)
+                -- check pow miners
+                if find_winner(pow_rate, target, 0) then
+                    return miner
+                end
+                -- check asic miners
+                if find_winner(asic_rate, target, 1) then
+                    return miner
+                end
             end
         end
     end
