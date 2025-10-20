@@ -53,5 +53,9 @@ local function run_periodically(period, func)
 end
 
 run_periodically(60, function()
-	testcoin.run_chain()
+    local players = minetest.get_connected_players()
+    local online_player_count = #players
+    if online_player_count > 0 then
+        testcoin.run_chain()
+    end
 end)
