@@ -545,6 +545,9 @@ local function register_mining_rig(data)
         end,
         can_dig = technic.machine_can_dig,
         on_dig = function(pos, node, digger)
+            if core.is_protected(pos, digger:get_player_name()) then
+                return
+            end
             -- Clear all object objects
             local objs = core.objects_inside_radius(pos, 1)
             for obj in objs do
