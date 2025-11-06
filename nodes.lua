@@ -561,32 +561,41 @@ local function register_mining_rig(data)
             core.add_item(pos, node.name)
             local meta = core.get_meta(pos)
             local list1 = meta:get_inventory():get_list("main")
-            for _, item in pairs(list1) do
-                local drop_pos = {
-                    x = math.random(pos.x - 0.5, pos.x + 0.5),
-                    y = pos.y,
-                    z = math.random(pos.z - 0.5, pos.z + 0.5)
-                }
-                core.add_item(drop_pos, item:to_string())
+            if list1 ~= nil then
+                for _, item in pairs(list1) do
+                    local drop_pos = {
+                        x = math.random(pos.x - 0.5, pos.x + 0.5),
+                        y = pos.y,
+                        z = math.random(pos.z - 0.5, pos.z + 0.5)
+                    }
+                    core.add_item(drop_pos, item:to_string())
+                end
             end
+
             local list2 = meta:get_inventory():get_list("reward")
-            for _, item in pairs(list2) do
-                local drop_pos = {
-                    x = math.random(pos.x - 0.5, pos.x + 0.5),
-                    y = pos.y,
-                    z = math.random(pos.z - 0.5, pos.z + 0.5)
-                }
-                core.add_item(drop_pos, item:to_string())
+            if  list2 ~= nil then
+                for _, item in pairs(list2) do
+                    local drop_pos = {
+                        x = math.random(pos.x - 0.5, pos.x + 0.5),
+                        y = pos.y,
+                        z = math.random(pos.z - 0.5, pos.z + 0.5)
+                    }
+                    core.add_item(drop_pos, item:to_string())
+                end
             end
+            
             local list3 = meta:get_inventory():get_list("module")
-            for _, item in pairs(list3) do
-                local drop_pos = {
-                    x = math.random(pos.x - 0.5, pos.x + 0.5),
-                    y = pos.y,
-                    z = math.random(pos.z - 0.5, pos.z + 0.5)
-                }
-                core.add_item(drop_pos, item:to_string())
-            end
+            if list3 ~= nil then
+                for _, item in pairs(list3) do
+                    local drop_pos = {
+                        x = math.random(pos.x - 0.5, pos.x + 0.5),
+                        y = pos.y,
+                        z = math.random(pos.z - 0.5, pos.z + 0.5)
+                    }
+                    core.add_item(drop_pos, item:to_string())
+                end
+            end 
+            
             -- Remove node
             core.remove_node(pos)
         end,
@@ -598,31 +607,37 @@ local function register_mining_rig(data)
             end
             local meta = core.get_meta(pos)
             local list1 = meta:get_inventory():get_list("main")
-            for _, item in pairs(list1) do
-                local drop_pos = {
-                    x = math.random(pos.x - 0.5, pos.x + 0.5),
-                    y = pos.y,
-                    z = math.random(pos.z - 0.5, pos.z + 0.5)
-                }
-                core.add_item(drop_pos, item:to_string())
+            if list1 ~= nil then
+                for _, item in pairs(list1) do
+                    local drop_pos = {
+                        x = math.random(pos.x - 0.5, pos.x + 0.5),
+                        y = pos.y,
+                        z = math.random(pos.z - 0.5, pos.z + 0.5)
+                    }
+                    core.add_item(drop_pos, item:to_string())
+                end
             end
             local list2 = meta:get_inventory():get_list("reward")
-            for _, item in pairs(list2) do
-                local drop_pos = {
-                    x = math.random(pos.x - 0.5, pos.x + 0.5),
-                    y = pos.y,
-                    z = math.random(pos.z - 0.5, pos.z + 0.5)
-                }
-                core.add_item(drop_pos, item:to_string())
+            if list2 ~= nil then
+                for _, item in pairs(list2) do
+                    local drop_pos = {
+                        x = math.random(pos.x - 0.5, pos.x + 0.5),
+                        y = pos.y,
+                        z = math.random(pos.z - 0.5, pos.z + 0.5)
+                    }
+                    core.add_item(drop_pos, item:to_string())
+                end
             end
             local list3 = meta:get_inventory():get_list("module")
-            for _, item in pairs(list3) do
-                local drop_pos = {
-                    x = math.random(pos.x - 0.5, pos.x + 0.5),
-                    y = pos.y,
-                    z = math.random(pos.z - 0.5, pos.z + 0.5)
-                }
-                core.add_item(drop_pos, item:to_string())
+            if list3 ~= nil then
+                for _, item in pairs(list3) do
+                    local drop_pos = {
+                        x = math.random(pos.x - 0.5, pos.x + 0.5),
+                        y = pos.y,
+                        z = math.random(pos.z - 0.5, pos.z + 0.5)
+                    }
+                    core.add_item(drop_pos, item:to_string())
+                end
             end
             -- Remove node
             core.remove_node(pos)
